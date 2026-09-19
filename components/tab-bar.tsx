@@ -13,6 +13,8 @@ const tabs = [
 
 export function TabBar() {
   const pathname = usePathname();
+  // Signed-out screens have nowhere to navigate to.
+  if (pathname === "/login") return null;
   return (
     <nav
       aria-label="Main"
