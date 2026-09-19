@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Design tokens — "Modern Judicial Romance" (Stitch). Light theme only. */
+@theme {
+  --color-espresso: #3e2723;
+  --color-espresso-deep: #271310;
+  --color-rose: #f4c9d6;
+  --color-rose-deep: #765560;
+  --color-canvas: #f5f0e6;
+  --color-walnut: #8c6d62;
+  --color-surface: #ffffff;
+  --color-ink: #1d1c16;
+  --color-recessed: #eae3d6;
+  --color-outline-soft: #d3c3c0;
+  --color-error: #ba1a1a;
+  --color-hairline: rgb(62 39 35 / 0.08);
+  --color-hairline-strong: rgb(62 39 35 / 0.15);
+
+  --radius-card: 1rem;
+  --radius-field: 0.75rem;
+
+  --shadow-card: 0 2px 8px -2px rgb(62 39 35 / 0.04),
+    0 8px 24px -4px rgb(62 39 35 / 0.06);
+  --shadow-float: 0 16px 40px -8px rgb(62 39 35 / 0.12);
+
+  --text-display-verdict: 34px;
+  --text-display-verdict--line-height: 40px;
+  --text-display-verdict--letter-spacing: -0.02em;
+  --text-display-verdict--font-weight: 700;
+  --text-headline-lg: 24px;
+  --text-headline-lg--line-height: 30px;
+  --text-headline-lg--letter-spacing: -0.015em;
+  --text-headline-lg--font-weight: 600;
+  --text-headline-md: 20px;
+  --text-headline-md--line-height: 26px;
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 600;
+  --text-headline-sm: 17px;
+  --text-headline-sm--line-height: 22px;
+  --text-headline-sm--letter-spacing: -0.005em;
+  --text-headline-sm--font-weight: 600;
+  --text-body-lg: 17px;
+  --text-body-lg--line-height: 24px;
+  --text-body-md: 15px;
+  --text-body-md--line-height: 21px;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+  --text-label-docket: 11px;
+  --text-label-docket--line-height: 14px;
+  --text-label-docket--letter-spacing: 0.06em;
+  --text-label-docket--font-weight: 700;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
 }
