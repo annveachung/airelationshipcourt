@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { aiConfigured } from "@/lib/ai/client";
-import { runAnalysisStep } from "@/lib/cases/pipeline";
+import { runAnalysisStep, runPanelStep } from "@/lib/cases/pipeline";
 import { setCaseError } from "@/lib/cases/state-machine";
 import { createClient } from "@/lib/supabase/server";
 
-// Analysis + question writing can take a while on a slow model.
+// Analysis, the three panel members and the verdict can take a while on a slow model.
 export const maxDuration = 60;
 export const runtime = "nodejs";
 
@@ -27,7 +27,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/cases/[case
   const row = (data as { stage: string; failed: boolean }[] | null)?.[0];
   if (!row) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  if (row.stage !== "ANALYSIS") {
+  // The two stages that do AI work. Anything else has nothing to advance.
+  if (row.stage !== "ANALYSIS" && row.stage !== "PANEL_JUDGEMENT") {
     return NextResponse.json({ stage: row.stage, status: "idle" });
   }
 
@@ -43,9 +44,17 @@ export async function POST(request: Request, ctx: RouteContext<"/api/cases/[case
   }
   if (row.failed) await setCaseError(caseId, null);
 
-  const result = await runAnalysisStep(caseId);
+  if (row.stage === "ANALYSIS") {
+    const result = await runAnalysisStep(caseId);
+    return NextResponse.json({
+      stage: result === "advanced" ? "FOLLOW_UP" : row.stage,
+      status: result,
+    });
+  }
+
+  const result = await runPanelStep(caseId);
   return NextResponse.json({
-    stage: result === "advanced" ? "FOLLOW_UP" : row.stage,
+    stage: result === "advanced" ? "VERDICT" : row.stage,
     status: result,
   });
 }

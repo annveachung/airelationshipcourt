@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-Hant.json";
+import { CHARGE_IDS } from "@/lib/cases/charges";
 
 type Tree = { [key: string]: string | Tree };
 
@@ -29,6 +30,15 @@ describe("translations", () => {
   it("keep the same {placeholders} and <tags> in both languages", () => {
     for (const key of Object.keys(enFlat)) {
       expect(placeholders(zhFlat[key]), key).toBe(placeholders(enFlat[key]));
+    }
+  });
+});
+
+describe("charges", () => {
+  it("every fixed-list charge id has a label in both languages", () => {
+    for (const id of CHARGE_IDS) {
+      expect(enFlat[`charges.${id}`], id).toBeTruthy();
+      expect(zhFlat[`charges.${id}`], id).toBeTruthy();
     }
   });
 });
