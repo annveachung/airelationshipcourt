@@ -3,6 +3,7 @@ import { refreshInvite } from "@/app/couple/actions";
 import { InviteLinkCard } from "@/components/auth/invite-link-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { friendlyError, getMyCouple, inviteLink } from "@/lib/couples";
 import { createClient } from "@/lib/supabase/server";
@@ -23,7 +24,7 @@ export default async function InvitePage({ searchParams }: PageProps<"/couple/in
   const error = friendlyError((await searchParams).error);
 
   return (
-    <div className="flex flex-col gap-4">
+    <Page className="gap-4">
       <SectionHeading label="Registry" title="Invite your partner" />
       <Card className="flex flex-col gap-4">
         <p className="text-body-md text-ink">
@@ -47,6 +48,6 @@ export default async function InvitePage({ searchParams }: PageProps<"/couple/in
           </form>
         )}
       </Card>
-    </div>
+    </Page>
   );
 }

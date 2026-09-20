@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { acceptInvite } from "@/app/couple/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { friendlyError, getMyCouple, INVITE_CODE_PATTERN } from "@/lib/couples";
 import { createClient } from "@/lib/supabase/server";
@@ -27,7 +28,7 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
   const alreadyInCouple = (await getMyCouple(user.id)).kind !== "none";
 
   return (
-    <div className="flex flex-col gap-4">
+    <Page className="gap-4">
       <SectionHeading label="Summons" title="You've been invited" />
       <Card variant="verdict" className="flex flex-col gap-4">
         {!inviter ? (
@@ -56,6 +57,6 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
           </>
         )}
       </Card>
-    </div>
+    </Page>
   );
 }

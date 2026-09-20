@@ -2,6 +2,7 @@ import { Scale } from "lucide-react";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Page } from "@/components/ui/page";
 import { safeNext } from "@/lib/auth";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -10,7 +11,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const failed = params.error === "signin_failed";
 
   return (
-    <div className="flex flex-col gap-6 pt-6">
+    <Page className="pt-6 md:pt-16">
       <div className="flex flex-col items-start gap-3">
         <Scale size={36} className="text-espresso" aria-hidden />
         <Badge>Court clerk</Badge>
@@ -27,6 +28,6 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         )}
         <GoogleButton next={next} />
       </Card>
-    </div>
+    </Page>
   );
 }

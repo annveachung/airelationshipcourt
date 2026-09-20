@@ -7,7 +7,7 @@ A couple can file a case, and each partner can privately submit their side. The 
 ## 2. Prerequisites
 
 - Phases 1–2 complete and two paired accounts available for testing.
-- Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` (Supabase → Project Settings → API). This key bypasses all security rules — treat it like a password: never prefix it `NEXT_PUBLIC_`, never import it into a page or component.
+- Add `SUPABASE_SECRET_KEY` to `.env.local` (Supabase → API Keys → secret key). This key bypasses all security rules — treat it like a password: never prefix it `NEXT_PUBLIC_`, never import it into a page or component.
 - Read `node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md` and `02-guides/forms.md`.
 
 ## 3. What gets built
@@ -20,6 +20,8 @@ A couple can file a case, and each partner can privately submit their side. The 
   - `cases`: members of the couple can read; members can create; **no update policy** (only the state machine, using the service role, changes a stage).
   - `testimonies`: you can always read **your own**; you can read your partner's only if you're in the couple **and** the case `stage >= 'VERDICT'`. Insert allowed for yourself only. **No update or delete policy** — testimony is final once submitted.
 
+**Also added while building:** one open case per couple is enforced by a partial unique index; case creation goes through a `create_case()` database function and the waiting screen polls `case_submission_status()` (booleans only); answers are capped at 2,000 characters; the shell became responsive (top nav on desktop, tab bar on phones).
+
 **Server logic** (`lib/`)
 - `lib/supabase/service.ts` — the service-role client. Header comment: *"Server only. Bypasses Row Level Security. Never import from a page or component."*
 - `lib/cases/state-machine.ts` — the only code allowed to change `cases.stage`. Contains the allowed-transitions map and one function, `transition(caseId, from, to)`, implemented as a compare-and-swap: `UPDATE cases SET stage = to … WHERE id = … AND stage = from`. Zero rows updated means someone else already advanced it — that's normal, not an error.
@@ -31,7 +33,7 @@ A couple can file a case, and each partner can privately submit their side. The 
   - You haven't submitted → the testimony form.
   - You have, partner hasn't → the waiting screen.
   - Both submitted → an "ANALYSIS — the court is reviewing" holding screen.
-- `components/court/testimony-form.tsx` — six questions in the court style: free text, an emotion chip picker (Angry, Hurt, Ignored, Frustrated, Disappointed, Confused, Embarrassed, Other) with optional note, a 1–10 severity slider, and three more free-text fields.
+- `components/court/testimony-form.tsx` — mostly quick-pick answers: what happened (text, 2,000 chars), how you felt (20 emotion chips, no note), severity 1–10 slider, what caused it (chips + optional short note), has this happened before (first time / sometimes / often), what you wanted from your partner (chips + optional short note), and what your partner did wrong (text, 1,000 chars). Migration `20260920000001_structured_testimony.sql` reshaped the `testimonies` columns to match.
 - `components/court/waiting-screen.tsx` — a client component that polls every ~3 seconds and refreshes the page when the stage changes.
 - `app/api/cases/[caseId]/status/route.ts` — small JSON endpoint the poller calls: returns the stage and *which partners have submitted* (booleans only — never testimony content).
 - The Docket (`app/page.tsx`) gains a case list and a "File a case" button.
@@ -77,6 +79,7 @@ A couple can file a case, and each partner can privately submit their side. The 
 - [ ] Trying to read the partner's testimony directly from the database as a normal user returns nothing.
 - [ ] The status endpoint response contains only stage and submitted-yes/no flags.
 - [ ] No code outside `lib/cases/state-machine.ts` writes `cases.stage` (check with a text search for `stage:` and `.update(`).
+- [ ] The app is responsive: phones (390px) show the bottom tab bar and one column; desktop (768px+) shows the top nav and a two-column case page; no horizontal scrolling at 320, 390, 768 or 1280px.
 - [ ] `npm run lint` and `npm run build` pass.
 
 ## 7. Deliberately not in this phase

@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Page } from "@/components/ui/page";
 import { Input } from "@/components/ui/input";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -33,7 +34,7 @@ const typeScale = [
 
 export default function DesignPage() {
   return (
-    <div className="flex flex-col gap-10">
+    <Page className="gap-10">
       <SectionHeading label="Dev only" title="Design system" />
 
       <section className="flex flex-col gap-3">
@@ -104,6 +105,6 @@ export default function DesignPage() {
           </div>
         ))}
       </section>
-    </div>
+    </Page>
   );
 }

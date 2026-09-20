@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createCouple } from "@/app/couple/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { friendlyError, getMyCouple } from "@/lib/couples";
 import { createClient } from "@/lib/supabase/server";
@@ -19,7 +20,7 @@ export default async function NewCouplePage({ searchParams }: PageProps<"/couple
   const error = friendlyError((await searchParams).error);
 
   return (
-    <div className="flex flex-col gap-4">
+    <Page className="gap-4">
       <SectionHeading label="Registry" title="Create your couple" />
       <Card className="flex flex-col gap-4">
         <p className="text-body-md text-ink">
@@ -37,6 +38,6 @@ export default async function NewCouplePage({ searchParams }: PageProps<"/couple
           </Button>
         </form>
       </Card>
-    </div>
+    </Page>
   );
 }
