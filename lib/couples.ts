@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { INVITE_ERROR_KEYS } from "@/lib/error-keys";
 import { createClient } from "@/lib/supabase/server";
 
 export type Partner = {
@@ -64,23 +65,7 @@ export async function inviteLink(code: string): Promise<string> {
 // 22-character base64url, matching what create_invite() generates.
 export const INVITE_CODE_PATTERN = /^[A-Za-z0-9_-]{22}$/;
 
-export const INVITE_ERRORS: Record<string, string> = {
-  invite_invalid: "That invite link doesn't look right.",
-  invite_used: "That invite has already been used.",
-  invite_expired: "That invite has expired. Ask your partner for a new one.",
-  invite_own: "You can't join your own invite — send it to your partner.",
-  already_in_couple: "You're already part of a couple.",
-  no_pending_couple: "You don't have a couple waiting for a partner.",
-};
-
 // Maps a database error message to a known error key (passed in the URL, never raw text).
 export function errorKey(message: string | undefined): string {
-  return Object.keys(INVITE_ERRORS).find((k) => message?.includes(k)) ?? "unknown";
-}
-
-// Turns an error key from the URL into user-facing text. Unknown keys get a generic message.
-export function friendlyError(key: string | string[] | undefined): string | null {
-  if (!key) return null;
-  const k = Array.isArray(key) ? key[0] : key;
-  return INVITE_ERRORS[k] ?? "Something went wrong. Please try again.";
+  return INVITE_ERROR_KEYS.find((k) => k !== "unknown" && message?.includes(k)) ?? "unknown";
 }

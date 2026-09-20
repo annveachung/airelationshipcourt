@@ -1,3 +1,4 @@
+import { AI_LANGUAGE_NAMES, type Locale } from "@/lib/i18n";
 import type { Analysis } from "../schemas";
 import { DATA_NOT_INSTRUCTIONS, formatTestimony, type PartnerTestimony } from "./format";
 
@@ -41,7 +42,12 @@ export const QUESTIONS_EXAMPLE = {
   ],
 };
 
-export function followUpMessages(a: PartnerTestimony, b: PartnerTestimony, analysis: Analysis) {
+export function followUpMessages(
+  a: PartnerTestimony,
+  b: PartnerTestimony,
+  analysis: Analysis,
+  languages: { a: Locale; b: Locale },
+) {
   const system = `You are the clerk of a lighthearted but fair "relationship court". Both partners have given private
 accounts, and an analysis has been prepared. Now write the ONLY follow-up round: exactly 3 questions for Partner A and
 exactly 3 questions for Partner B.
@@ -58,6 +64,9 @@ must earn its place:
 - At most ONE "short_answer" per partner; the other two must be quick-pick.
 - Questions for Partner A are asked ONLY of Partner A; likewise for Partner B. They may differ.
 - Refer to no one by name. Do not invent facts.
+- LANGUAGE: write Partner A's questions (question_text and every option) in ${AI_LANGUAGE_NAMES[languages.a]}, and
+  Partner B's in ${AI_LANGUAGE_NAMES[languages.b]}. Keep the JSON keys and the "format" values exactly as shown, and
+  write each "topic" in English (it is internal). The testimony itself may be in either language.
 
 Respond with only a JSON object in exactly this shape (values are illustrative):
 ${JSON.stringify(QUESTIONS_EXAMPLE, null, 2)}`;

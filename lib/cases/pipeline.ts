@@ -6,6 +6,7 @@ import { analysisMessages } from "@/lib/ai/prompts/analysis";
 import { followUpMessages } from "@/lib/ai/prompts/follow-up";
 import type { PartnerTestimony } from "@/lib/ai/prompts/format";
 import { analysisSchema, questionsSchema, type Analysis } from "@/lib/ai/schemas";
+import { isLocale, type Locale } from "@/lib/i18n";
 import { createServiceClient } from "@/lib/supabase/service";
 import { setCaseError, transition } from "./state-machine";
 
@@ -36,9 +37,10 @@ const toPartner = (r: TestimonyRow): PartnerTestimony => ({
   needsNote: r.needs_note,
 });
 
+// Stored in `cases.last_error` as KEYS; the screen translates them.
 const FRIENDLY = {
-  invalid_output: "The court couldn't finish reading the case. Please try again.",
-  unavailable: "The court's AI is unavailable right now. Please try again in a moment.",
+  invalid_output: "invalid_output",
+  unavailable: "unavailable",
 } as const;
 
 async function loadCase(caseId: string) {
@@ -60,10 +62,22 @@ async function loadCase(caseId: string) {
 
   const userA = members?.find((m) => m.role === "partner_a")?.user_id;
   const userB = members?.find((m) => m.role === "partner_b")?.user_id;
+  // Each partner's language, so their questions are written in it.
+  const { data: profiles } = await db.from("profiles").select("id, locale").in("id", [userA, userB].filter(Boolean) as string[]);
+  const localeOf = (id: string | undefined): Locale => {
+    const l = profiles?.find((p) => p.id === id)?.locale;
+    return isLocale(l) ? l : "en";
+  };
   const a = rows?.find((r) => r.user_id === userA);
   const b = rows?.find((r) => r.user_id === userB);
   if (!userA || !userB || !a || !b) return null;
-  return { userA, userB, a: toPartner(a), b: toPartner(b) };
+  return {
+    userA,
+    userB,
+    a: toPartner(a),
+    b: toPartner(b),
+    languages: { a: localeOf(userA), b: localeOf(userB) },
+  };
 }
 
 /** ANALYSIS stage: analyse both testimonies, then write the follow-up questions. */
@@ -104,7 +118,7 @@ export async function runAnalysisStep(caseId: string): Promise<StepResult> {
     .eq("case_id", caseId);
 
   if (!count) {
-    const { system, user } = followUpMessages(loaded.a, loaded.b, analysis);
+    const { system, user } = followUpMessages(loaded.a, loaded.b, analysis, loaded.languages);
     const result = await runStructured({
       caseId,
       stage: "follow_up_questions",

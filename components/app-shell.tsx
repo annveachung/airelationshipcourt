@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { Scale } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/auth/avatar";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { LanguageMenu } from "@/components/language-menu";
 import { createClient } from "@/lib/supabase/server";
 import { TabBar } from "./tab-bar";
 import { TopNav } from "./top-nav";
@@ -11,6 +13,7 @@ import { TopNav } from "./top-nav";
 const container = "mx-auto w-full max-w-[430px] px-5 md:max-w-5xl md:px-8";
 
 export async function AppShell({ children }: { children: ReactNode }) {
+  const t = await getTranslations("shell");
   const supabase = await createClient();
   const {
     data: { user },
@@ -25,18 +28,19 @@ export async function AppShell({ children }: { children: ReactNode }) {
         <div className={`${container} flex items-center gap-2 py-3 md:gap-6`}>
           <div className="flex items-center gap-2">
             <Scale size={20} className="text-espresso" aria-hidden />
-            <span className="text-label-docket uppercase text-espresso">
-              AI Relationship Court
-            </span>
+            <span className="text-label-docket uppercase text-espresso">{t("brand")}</span>
           </div>
           <TopNav />
           <span className="flex-1 md:hidden" />
-          {user && (
-            <div className="flex items-center gap-2">
-              <Avatar name={name} url={avatarUrl} className="size-7 text-label-sm" />
-              <SignOutButton />
-            </div>
-          )}
+          <div className="flex items-center gap-1 md:gap-2">
+            <LanguageMenu />
+            {user && (
+              <>
+                <Avatar name={name} url={avatarUrl} className="size-7 text-label-sm" />
+                <SignOutButton />
+              </>
+            )}
+          </div>
         </div>
       </header>
       <main className={`${container} flex-1 pb-28 pt-6 md:pb-12 md:pt-10`}>{children}</main>

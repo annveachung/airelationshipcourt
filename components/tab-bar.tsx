@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { isActive, navLinks } from "./nav-links";
@@ -8,15 +9,17 @@ import { isActive, navLinks } from "./nav-links";
 // Phone navigation (below md). Desktop uses the top nav instead.
 export function TabBar() {
   const pathname = usePathname();
+  const t = useTranslations("nav");
+  const tShell = useTranslations("shell");
   // Signed-out screens have nowhere to navigate to.
   if (pathname === "/login") return null;
   return (
     <nav
-      aria-label="Main"
+      aria-label={tShell("mainNav")}
       className="fixed inset-x-0 bottom-0 z-20 border-t border-hairline bg-canvas/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-[20px] backdrop-saturate-150 md:hidden"
     >
       <ul className="mx-auto flex max-w-[430px]">
-        {navLinks.map(({ href, label, icon: Icon }) => {
+        {navLinks.map(({ href, labelKey, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <li key={href} className="flex-1">
@@ -29,7 +32,7 @@ export function TabBar() {
                 )}
               >
                 <Icon size={20} strokeWidth={active ? 2.25 : 1.75} />
-                {label}
+                {t(labelKey)}
               </Link>
             </li>
           );

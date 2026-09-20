@@ -13,15 +13,3 @@ export const CASE_STAGES = [
 ] as const;
 
 export type CaseStage = (typeof CASE_STAGES)[number];
-
-export const STAGE_LABELS: Record<CaseStage, string> = {
-  CASE_OPEN: "Case opened",
-  TESTIMONY: "Testimony",
-  ANALYSIS: "Case analysis",
-  FOLLOW_UP: "Follow-up round",
-  PANEL_JUDGEMENT: "Panel deliberation",
-  VERDICT: "Verdict ready",
-  RECOMMENDATIONS: "Recommendations",
-  REPORT: "Case report",
-  CLOSED: "Closed",
-};

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 export function InviteLinkCard({ link }: { link: string }) {
+  const t = useTranslations("couple.invite");
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -22,13 +24,13 @@ export function InviteLinkCard({ link }: { link: string }) {
       <input
         readOnly
         value={link}
-        aria-label="Invite link"
+        aria-label={t("linkLabel")}
         onFocus={(e) => e.currentTarget.select()}
         className="w-full rounded-field border border-hairline-strong bg-surface px-3.5 py-3 text-body-sm text-espresso"
       />
       <Button variant="secondary" onClick={copy}>
         {copied ? <Check size={16} /> : <Copy size={16} />}
-        {copied ? "Copied" : "Copy link"}
+        {copied ? t("copied") : t("copy")}
       </Button>
     </div>
   );

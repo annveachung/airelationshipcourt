@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { isActive, navLinks } from "./nav-links";
@@ -8,10 +9,12 @@ import { isActive, navLinks } from "./nav-links";
 // Desktop navigation (md and up). Phones use the bottom tab bar instead.
 export function TopNav() {
   const pathname = usePathname();
+  const t = useTranslations("nav");
+  const tShell = useTranslations("shell");
   if (pathname === "/login") return null;
   return (
-    <nav aria-label="Main" className="hidden flex-1 items-center gap-1 md:flex">
-      {navLinks.map(({ href, label }) => {
+    <nav aria-label={tShell("mainNav")} className="hidden flex-1 items-center gap-1 md:flex">
+      {navLinks.map(({ href, labelKey }) => {
         const active = isActive(pathname, href);
         return (
           <Link
@@ -24,7 +27,7 @@ export function TopNav() {
               active ? "bg-rose/40 text-espresso" : "text-walnut hover:text-espresso",
             )}
           >
-            {label}
+            {t(labelKey)}
           </Link>
         );
       })}

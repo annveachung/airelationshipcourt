@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { NewCaseForm } from "@/components/court/new-case-form";
@@ -5,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { caseError } from "@/lib/cases/testimony";
+import { toCaseErrorKey } from "@/lib/error-keys";
 import { getMyCouple } from "@/lib/couples";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function NewCasePage({ searchParams }: PageProps<"/cases/new">) {
+  const t = await getTranslations("newCase");
+  const tErr = await getTranslations("caseErrors");
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,18 +20,16 @@ export default async function NewCasePage({ searchParams }: PageProps<"/cases/ne
   if (!user) redirect("/login");
 
   const couple = await getMyCouple(user.id);
-  const error = caseError((await searchParams).error);
+  const errorKey = toCaseErrorKey((await searchParams).error);
 
   if (couple.kind !== "active") {
     return (
       <Page className="gap-4">
-        <SectionHeading label="Docket" title="File a case" />
+        <SectionHeading label={t("label")} title={t("title")} />
         <Card className="flex flex-col gap-4">
-          <p className="text-body-md text-ink">
-            A case needs both partners. Finish setting up your couple first.
-          </p>
+          <p className="text-body-md text-ink">{t("needCouple")}</p>
           <Button href={couple.kind === "none" ? "/couple/new" : "/couple/invite"}>
-            {couple.kind === "none" ? "Create a couple" : "Invite your partner"}
+            {couple.kind === "none" ? t("createCouple") : t("invitePartner")}
           </Button>
         </Card>
       </Page>
@@ -45,13 +46,12 @@ export default async function NewCasePage({ searchParams }: PageProps<"/cases/ne
   if (open) {
     return (
       <Page className="gap-4">
-        <SectionHeading label="Docket" title="File a case" />
+        <SectionHeading label={t("label")} title={t("title")} />
         <Card className="flex flex-col gap-4">
           <p className="text-body-md text-ink">
-            You already have an open case: <strong>{open.title}</strong>. Finish it before filing
-            another.
+            {t.rich("alreadyOpen", { title: open.title, strong: (chunks) => <strong>{chunks}</strong> })}
           </p>
-          <Button href={`/cases/${open.id}`}>Go to your open case</Button>
+          <Button href={`/cases/${open.id}`}>{t("goOpen")}</Button>
         </Card>
       </Page>
     );
@@ -59,19 +59,17 @@ export default async function NewCasePage({ searchParams }: PageProps<"/cases/ne
 
   return (
     <Page className="gap-4">
-      <SectionHeading label="Docket" title="File a case" />
+      <SectionHeading label={t("label")} title={t("title")} />
       <Card className="flex flex-col gap-5 md:p-6">
-        <p className="text-body-md text-walnut">
-          Describe what the case is about. The court will name it, then both partners tell their side, privately.
-        </p>
-        {error && (
+        <p className="text-body-md text-walnut">{t("intro")}</p>
+        {errorKey && (
           <p role="alert" className="text-body-sm text-error">
-            {error}
+            {tErr(errorKey)}
           </p>
         )}
         <NewCaseForm />
         <Link href="/" className="text-body-sm text-walnut underline">
-          Back to docket
+          {t("back")}
         </Link>
       </Card>
     </Page>

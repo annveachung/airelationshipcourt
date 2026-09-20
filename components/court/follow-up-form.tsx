@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { submitFollowUp } from "@/app/cases/actions";
 import { Button } from "@/components/ui/button";
 import { fieldClasses } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
+import { optionLabel } from "@/lib/i18n-labels";
 
 export type FollowUpQuestionRow = {
   id: string;
@@ -21,13 +23,14 @@ const chip = cn(
 );
 
 function Submit({ ready }: { ready: boolean }) {
+  const t = useTranslations("followUp");
   const { pending } = useFormStatus();
   return (
     <div className="flex flex-col gap-2">
       <Button type="submit" disabled={pending || !ready} className="w-full md:w-auto md:min-w-56">
-        {pending ? "Submitting…" : "Submit answers"}
+        {pending ? t("submitting") : t("submit")}
       </Button>
-      {!ready && <p className="text-body-sm text-walnut">Answer every question to continue.</p>}
+      {!ready && <p className="text-body-sm text-walnut">{t("answerAll")}</p>}
     </div>
   );
 }
@@ -39,6 +42,8 @@ export function FollowUpForm({
   caseId: string;
   questions: FollowUpQuestionRow[];
 }) {
+  const t = useTranslations("followUp");
+  const tAll = useTranslations();
   // Which questions have been answered (a slider only counts once it's been moved).
   const [answered, setAnswered] = useState<Record<string, boolean>>({});
   const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -54,7 +59,7 @@ export function FollowUpForm({
         return (
           <fieldset key={q.id} className="flex flex-col gap-3">
             <legend className="mb-1 text-body-lg font-medium text-espresso">
-              <span className="mr-2 text-label-docket uppercase text-walnut">Q{i + 1}</span>
+              <span className="mr-2 text-label-docket uppercase text-walnut">{t("question", { n: i + 1 })}</span>
               {q.question_text}
             </legend>
 
@@ -70,7 +75,9 @@ export function FollowUpForm({
                       onChange={() => mark(q.id, true)}
                       className="peer sr-only"
                     />
-                    <span className={chip}>{option}</span>
+                    <span className={chip}>
+                      {q.format === "true_false_unsure" ? optionLabel(tAll, "trueFalse", option) : option}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -97,8 +104,8 @@ export function FollowUpForm({
                   </span>
                 </div>
                 <div className="flex justify-between text-body-sm text-walnut md:max-w-md">
-                  <span>1 = not at all</span>
-                  <span>10 = very much</span>
+                  <span>{t("scaleLow")}</span>
+                  <span>{t("scaleHigh")}</span>
                 </div>
               </div>
             )}
@@ -114,9 +121,7 @@ export function FollowUpForm({
         );
       })}
 
-      <p className="text-body-sm text-walnut">
-        You only get one round of follow-up questions. Your answers stay private until the verdict.
-      </p>
+      <p className="text-body-sm text-walnut">{t("note")}</p>
       <Submit ready={ready} />
     </form>
   );

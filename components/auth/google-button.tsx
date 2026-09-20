@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/browser";
 
 export function GoogleButton({ next }: { next: string }) {
+  const t = useTranslations("login");
   const [busy, setBusy] = useState(false);
 
   async function signIn() {
@@ -20,7 +22,7 @@ export function GoogleButton({ next }: { next: string }) {
 
   return (
     <Button onClick={signIn} disabled={busy} className="w-full">
-      {busy ? "Opening Google…" : "Continue with Google"}
+      {busy ? t("googleBusy") : t("google")}
     </Button>
   );
 }

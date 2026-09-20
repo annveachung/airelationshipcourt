@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { submitTestimony } from "@/app/cases/actions";
 import { Button } from "@/components/ui/button";
 import { fieldClasses } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
 import { CAUSES, EMOTIONS, FREQUENCIES, LIMITS, NEEDS } from "@/lib/cases/testimony";
+import { optionLabel } from "@/lib/i18n-labels";
 
 const label = "text-label-docket uppercase text-walnut";
 
@@ -22,6 +24,7 @@ function ChipGroup({
   legend,
   hint,
   options,
+  group,
   multiple = true,
   onCount,
   children,
@@ -29,11 +32,13 @@ function ChipGroup({
   name: string;
   legend: string;
   hint?: string;
-  options: readonly string[] | readonly { value: string; label: string }[];
+  options: readonly string[];
+  group: "emotions" | "causes" | "needs" | "frequency";
   multiple?: boolean;
   onCount?: (n: number) => void;
   children?: React.ReactNode;
 }) {
+  const t = useTranslations();
   const [selected, setSelected] = useState<string[]>([]);
 
   function toggle(value: string, checked: boolean) {
@@ -53,9 +58,8 @@ function ChipGroup({
         {hint && <span className="ml-2 text-body-sm normal-case text-walnut">{hint}</span>}
       </legend>
       <div className="flex flex-wrap gap-2">
-        {options.map((option) => {
-          const value = typeof option === "string" ? option : option.value;
-          const text = typeof option === "string" ? option : option.label;
+        {options.map((value) => {
+          const text = optionLabel(t, group, value);
           return (
             <label key={value} className="cursor-pointer">
               <input
@@ -132,22 +136,22 @@ function CountedTextarea({
 }
 
 function Submit({ ready }: { ready: boolean }) {
+  const t = useTranslations("testimony");
   const { pending } = useFormStatus();
   return (
     <div className="flex flex-col gap-2">
       <Button type="submit" disabled={pending || !ready} className="w-full md:w-auto md:min-w-56">
-        {pending ? "Submitting…" : "Submit testimony"}
+        {pending ? t("submitting") : t("submit")}
       </Button>
       {!ready && (
-        <p className="text-body-sm text-walnut">
-          Pick at least one option for feelings, cause and what you needed to continue.
-        </p>
+        <p className="text-body-sm text-walnut">{t("pickHint")}</p>
       )}
     </div>
   );
 }
 
 export function TestimonyForm({ caseId }: { caseId: string }) {
+  const t = useTranslations("testimony");
   const [severity, setSeverity] = useState(5);
   const [counts, setCounts] = useState({ emotions: 0, causes: 0, needs: 0 });
   const ready = counts.emotions > 0 && counts.causes > 0 && counts.needs > 0;
@@ -159,41 +163,44 @@ export function TestimonyForm({ caseId }: { caseId: string }) {
       <input type="hidden" name="caseId" value={caseId} />
 
       {/* 1. The story first: everything below is a detail about it. */}
-      <CountedTextarea name="whatHappened" legend="What happened?" max={LIMITS.story} />
+      <CountedTextarea name="whatHappened" legend={t("whatHappened")} max={LIMITS.story} />
 
       {/* 2. Quick context about the story. */}
       <ChipGroup
         name="frequency"
-        legend="Has this happened before?"
+        legend={t("frequencyLegend")}
         multiple={false}
-        options={FREQUENCIES}
+        options={FREQUENCIES.map((f) => f.value)}
+        group="frequency"
       />
 
       {/* 3. Still about the event. */}
       <ChipGroup
         name="causes"
-        legend="What do you think caused it?"
-        hint="Pick all that apply"
+        legend={t("causesLegend")}
+        hint={t("pickAll")}
         options={CAUSES}
+        group="causes"
         onCount={count("causes")}
       >
-        <Note name="causeNote" prompt="Anything to add? (optional)" />
+        <Note name="causeNote" prompt={t("noteOptional")} />
       </ChipGroup>
 
       {/* 4. Then the reaction... */}
       <ChipGroup
         name="emotions"
-        legend="How did you feel?"
-        hint="Pick all that apply"
+        legend={t("emotionsLegend")}
+        hint={t("pickAll")}
         options={EMOTIONS}
+        group="emotions"
         onCount={count("emotions")}
       />
 
       {/* 5. ...summed up as a rating. */}
       <div className="flex flex-col gap-3">
         <label htmlFor="severity" className={label}>
-          How serious was it?{" "}
-          <span className="normal-case text-body-sm">(1 = minor, 10 = severe)</span>
+          {t("severityLegend")}{" "}
+          <span className="normal-case text-body-sm">{t("severityScale")}</span>
         </label>
         <div className="flex items-center gap-4">
           <input
@@ -213,7 +220,7 @@ export function TestimonyForm({ caseId }: { caseId: string }) {
       {/* 6. The specific complaint. */}
       <CountedTextarea
         name="partnerDidWrong"
-        legend="What do you think your partner did wrong?"
+        legend={t("partnerWrong")}
         max={LIMITS.wrong}
         rows={4}
       />
@@ -221,17 +228,16 @@ export function TestimonyForm({ caseId }: { caseId: string }) {
       {/* 7. End on something constructive. */}
       <ChipGroup
         name="needs"
-        legend="What did you want from your partner?"
-        hint="Pick all that apply"
+        legend={t("needsLegend")}
+        hint={t("pickAll")}
         options={NEEDS}
+        group="needs"
         onCount={count("needs")}
       >
-        <Note name="needsNote" prompt="Anything to add? (optional)" />
+        <Note name="needsNote" prompt={t("noteOptional")} />
       </ChipGroup>
 
-      <p className="text-body-sm text-walnut">
-        Your testimony is final once submitted and stays private until the verdict.
-      </p>
+      <p className="text-body-sm text-walnut">{t("finalNote")}</p>
       <Submit ready={ready} />
     </form>
   );
