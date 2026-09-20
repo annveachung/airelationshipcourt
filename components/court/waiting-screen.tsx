@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Hourglass, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { AiErrorKey } from "@/lib/error-keys";
 
 type Status = {
   stage: string;
@@ -23,15 +25,17 @@ export function WaitingScreen({
   title,
   message,
   drive = false,
-  errorMessage = null,
+  errorKey = null,
 }: {
   caseId: string;
   initial: Status;
   title: string;
   message: string;
   drive?: boolean;
-  errorMessage?: string | null;
+  errorKey?: AiErrorKey | null;
 }) {
+  const t = useTranslations("waiting");
+  const tErr = useTranslations("aiErrors");
   const router = useRouter();
   const last = useRef(initial);
   const busy = useRef(false);
@@ -90,12 +94,12 @@ export function WaitingScreen({
     };
   }, [caseId, router, drive, advance, initial.failed]);
 
-  if (errorMessage) {
+  if (errorKey) {
     return (
       <div role="alert" className="flex flex-col items-center gap-3 py-6 text-center">
         <TriangleAlert size={32} className="text-error" aria-hidden />
-        <h2 className="text-headline-md text-espresso">The court hit a snag</h2>
-        <p className="max-w-sm text-body-md text-walnut">{errorMessage}</p>
+        <h2 className="text-headline-md text-espresso">{t("snagTitle")}</h2>
+        <p className="max-w-sm text-body-md text-walnut">{tErr(errorKey)}</p>
         {drive && (
           <Button
             disabled={retrying}
@@ -105,7 +109,7 @@ export function WaitingScreen({
               setRetrying(false);
             }}
           >
-            {retrying ? "Trying again…" : "Try again"}
+            {retrying ? t("retrying") : t("retry")}
           </Button>
         )}
       </div>

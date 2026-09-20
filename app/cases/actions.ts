@@ -1,10 +1,12 @@
 "use server";
 
+import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { generateCaseTitle } from "@/lib/ai/title";
 import { transition } from "@/lib/cases/state-machine";
 import { caseSchema, testimonySchema } from "@/lib/cases/testimony";
+import type { Locale } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 
 function optional(value: FormDataEntryValue | null) {
@@ -17,7 +19,7 @@ export async function createCase(formData: FormData) {
   if (!parsed.success) redirect("/cases/new?error=invalid");
 
   // The court names the case from the description (falls back to a plain title if the AI is down).
-  const title = await generateCaseTitle(parsed.data.context);
+  const title = await generateCaseTitle(parsed.data.context, (await getLocale()) as Locale);
 
   const supabase = await createClient();
   const { data: caseId, error } = await supabase.rpc("create_case", {

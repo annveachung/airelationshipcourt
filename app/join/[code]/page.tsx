@@ -1,15 +1,19 @@
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { acceptInvite } from "@/app/couple/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { friendlyError, getMyCouple, INVITE_CODE_PATTERN } from "@/lib/couples";
+import { getMyCouple, INVITE_CODE_PATTERN } from "@/lib/couples";
+import { toInviteErrorKey } from "@/lib/error-keys";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function JoinPage({ params, searchParams }: PageProps<"/join/[code]">) {
+  const t = await getTranslations("join");
+  const tErr = await getTranslations("inviteErrors");
   const { code } = await params;
-  const error = friendlyError((await searchParams).error);
+  const errorKey = toInviteErrorKey((await searchParams).error);
 
   const supabase = await createClient();
   const {
@@ -29,29 +33,28 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
 
   return (
     <Page className="gap-4">
-      <SectionHeading label="Summons" title="You've been invited" />
+      <SectionHeading label={t("label")} title={t("title")} />
       <Card variant="verdict" className="flex flex-col gap-4">
         {!inviter ? (
           <p role="alert" className="text-body-md text-error">
-            {error ?? "That invite link is invalid, already used, or expired. Ask your partner for a new one."}
+            {errorKey ? tErr(errorKey) : t("invalid")}
           </p>
         ) : alreadyInCouple ? (
-          <p className="text-body-md text-ink">You&apos;re already part of a couple.</p>
+          <p className="text-body-md text-ink">{t("already")}</p>
         ) : (
           <>
             <p className="text-body-md text-ink">
-              <strong>{inviter}</strong> has invited you to join their court as
-              Partner B.
+              {t.rich("body", { inviter, strong: (chunks) => <strong>{chunks}</strong> })}
             </p>
-            {error && (
+            {errorKey && (
               <p role="alert" className="text-body-sm text-error">
-                {error}
+                {tErr(errorKey)}
               </p>
             )}
             <form action={acceptInvite}>
               <input type="hidden" name="code" value={code} />
               <Button type="submit" className="w-full">
-                Join the court
+                {t("submit")}
               </Button>
             </form>
           </>

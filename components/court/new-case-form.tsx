@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { createCase } from "@/app/cases/actions";
 import { Button } from "@/components/ui/button";
@@ -9,26 +10,25 @@ import { LIMITS } from "@/lib/cases/testimony";
 import { cn } from "@/lib/cn";
 
 function Submit() {
+  const t = useTranslations("newCase");
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending} className="w-full md:w-auto md:self-start md:px-10">
-      {pending ? "The clerk is naming your case…" : "File the case"}
+      {pending ? t("submitting") : t("submit")}
     </Button>
   );
 }
 
 export function NewCaseForm() {
+  const t = useTranslations("newCase");
   const [length, setLength] = useState(0);
   return (
     <form action={createCase} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="context" className="text-label-docket uppercase text-walnut">
-          What is this case about?
+          {t("fieldLabel")}
         </label>
-        <p className="text-body-sm text-walnut">
-          A sentence or two of neutral background. The court will give the case a title — keep
-          your side of the story for your testimony.
-        </p>
+        <p className="text-body-sm text-walnut">{t("fieldHint")}</p>
         <textarea
           id="context"
           name="context"
@@ -36,7 +36,7 @@ export function NewCaseForm() {
           required
           minLength={10}
           maxLength={LIMITS.context}
-          placeholder="We argued because one of us cancelled dinner plans at the last minute."
+          placeholder={t("placeholder")}
           onChange={(e) => setLength(e.target.value.length)}
           className={cn(fieldClasses, "min-h-28 resize-y")}
         />

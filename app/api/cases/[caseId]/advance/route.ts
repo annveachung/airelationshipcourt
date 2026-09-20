@@ -38,7 +38,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/cases/[case
   }
 
   if (!aiConfigured()) {
-    await setCaseError(caseId, "The court's AI isn't set up yet. Add the DashScope key, then retry.");
+    await setCaseError(caseId, "not_configured");
     return NextResponse.json({ stage: row.stage, status: "failed" });
   }
   if (row.failed) await setCaseError(caseId, null);

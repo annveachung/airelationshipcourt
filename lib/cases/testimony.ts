@@ -89,18 +89,3 @@ export const testimonySchema = z.object({
   frequency: z.enum(["first_time", "sometimes", "often"]),
   partnerDidWrong: text(LIMITS.wrong),
 });
-
-export const CASE_ERRORS: Record<string, string> = {
-  case_already_open: "Your couple already has an open case. Finish it before filing another.",
-  no_active_couple: "You need a couple with both partners before filing a case.",
-  already_testified: "You've already given your testimony for this case.",
-  not_allowed: "You can't submit testimony for this case right now.",
-  already_answered: "You've already answered the follow-up questions for this case.",
-  invalid: "Please check your answers — some fields are missing, too short or too long.",
-};
-
-export function caseError(key: string | string[] | undefined): string | null {
-  if (!key) return null;
-  const k = Array.isArray(key) ? key[0] : key;
-  return CASE_ERRORS[k] ?? "Something went wrong. Please try again.";
-}

@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "title": "AI 伴侶法庭",
+    "description": "兩位伴侶、一場爭執、一個 AI 審判團，以及一份判決。"
+  },
+  "shell": {
+    "brand": "AI 伴侶法庭",
+    "signOut": "登出",
+    "language": "語言",
+    "mainNav": "主要導覽"
+  },
+  "nav": {
+    "docket": "案件簿",
+    "fileCase": "提出案件",
+    "verdicts": "判決"
+  },
+  "roles": {
+    "partnerA": "伴侶 A",
+    "partnerB": "伴侶 B",
+    "you": "（你）"
+  },
+  "login": {
+    "badge": "法庭書記官",
+    "title": "請報上你的大名。",
+    "subtitle": "登入後，法庭才知道是誰在作證。",
+    "google": "使用 Google 繼續",
+    "googleBusy": "正在開啟 Google…",
+    "failed": "登入未成功，請再試一次。"
+  },
+  "couple": {
+    "registry": "登記處",
+    "new": {
+      "title": "建立你們的伴侶檔案",
+      "body": "你會是伴侶 A。我們會給你一個專屬邀請連結，請傳給你的伴侶。對方加入後，你們就可以提出第一個案件。",
+      "submit": "建立伴侶檔案並取得邀請連結"
+    },
+    "invite": {
+      "title": "邀請你的伴侶",
+      "body": "請把這個連結傳給你的伴侶。連結只能使用一次，7 天後失效。",
+      "expired": "你先前的邀請已過期或已被使用。",
+      "renew": "建立新的邀請連結",
+      "linkLabel": "邀請連結",
+      "copy": "複製連結",
+      "copied": "已複製"
+    }
+  },
+  "join": {
+    "label": "傳票",
+    "title": "你收到了邀請",
+    "invalid": "這個邀請連結無效、已被使用或已過期。請向你的伴侶索取新的連結。",
+    "already": "你已經是某個伴侶檔案的成員了。",
+    "body": "<strong>{inviter}</strong> 邀請你以伴侶 B 的身分加入他們的法庭。",
+    "submit": "加入法庭"
+  },
+  "docket": {
+    "badge": "法庭開庭中",
+    "title": "你的案件簿",
+    "noneBody": "每個案件都需要雙方當事人。請先建立你們的伴侶檔案，再邀請你的伴侶。",
+    "createCouple": "建立伴侶檔案",
+    "waitingPartner": "正在等待你的伴侶加入。",
+    "showInvite": "顯示邀請連結",
+    "openCase": "前往進行中的案件",
+    "fileCase": "提出案件",
+    "casesHeading": "案件",
+    "noCases": "還沒有案件。提出你們的第一個案件吧。"
+  },
+  "history": {
+    "label": "登記處",
+    "title": "判決",
+    "body": "過往案件與分析將在第 8 階段推出。"
+  },
+  "newCase": {
+    "label": "案件簿",
+    "title": "提出案件",
+    "needCouple": "案件需要雙方伴侶參與。請先完成伴侶檔案的設定。",
+    "createCouple": "建立伴侶檔案",
+    "invitePartner": "邀請你的伴侶",
+    "alreadyOpen": "你們已經有一個進行中的案件：<strong>{title}</strong>。請先完成它，再提出新的案件。",
+    "goOpen": "前往進行中的案件",
+    "intro": "請描述這個案件的內容。法庭會為案件命名，接著雙方各自私下陳述自己的說法。",
+    "back": "回到案件簿",
+    "fieldLabel": "這個案件是關於什麼？",
+    "fieldHint": "用一兩句話中立地交代背景即可。法庭會為案件取名——你這一方的說法，請留到作證時再說。",
+    "placeholder": "我們吵架是因為其中一人在最後一刻取消了晚餐計畫。",
+    "submit": "提出案件",
+    "submitting": "書記官正在為你的案件命名…"
+  },
+  "casePage": {
+    "badge": "案件 #{id} · {stage}",
+    "details": "案件資料",
+    "testified": "已作證",
+    "notYet": "尚未",
+    "answered": "已回答",
+    "followUpHeading": "後續提問",
+    "testimonyTitle": "你的證詞",
+    "testimonyIntro": "請用你自己的話，向法庭說明發生了什麼事。在判決之前，{partner}看不到你寫的內容。",
+    "waitingForPartner": "正在等待{partner}",
+    "waitingTestimony": "你的證詞已提交。等你的伴侶也完成證詞，法庭就會繼續進行。此頁面會自動更新。",
+    "analysingTitle": "法庭正在分析案件",
+    "analysingBody": "雙方證詞都已送達。法庭正在閱讀並準備你的後續提問——這可能需要一分鐘左右。此頁面會自動更新。",
+    "followUpTitle": "法庭有幾個問題要請教",
+    "followUpIntro": "讀完雙方的說法後，法庭還需要你補充一些資訊。這是唯一的一輪提問。",
+    "questionsNotReady": "你的問題還沒準備好，請重新整理頁面。",
+    "waitingAnswers": "正在等待{partner}的回答",
+    "waitingAnswersBody": "你的回答已送出。等你的伴侶也回答完畢，法庭就會繼續進行。此頁面會自動更新。",
+    "panelTitle": "審判團正在評議",
+    "panelBody": "所有證據都已齊備。判決將在下一個開發階段推出。",
+    "stillBuilding": "法庭的這個部分仍在建置中。"
+  },
+  "testimony": {
+    "whatHappened": "發生了什麼事？",
+    "frequencyLegend": "這種情況以前發生過嗎？",
+    "causesLegend": "你認為問題的起因是什麼？",
+    "emotionsLegend": "你當時的感受是什麼？",
+    "pickAll": "可複選",
+    "noteOptional": "還有想補充的嗎？（選填）",
+    "severityLegend": "這件事有多嚴重？",
+    "severityScale": "（1 = 輕微，10 = 非常嚴重）",
+    "partnerWrong": "你認為你的伴侶做錯了什麼？",
+    "needsLegend": "你希望你的伴侶怎麼做？",
+    "finalNote": "證詞一經提交即為定稿，且在判決之前都會保密。",
+    "submit": "提交證詞",
+    "submitting": "提交中…",
+    "pickHint": "請在「感受」、「起因」和「你希望的做法」中至少各選一項，才能繼續。"
+  },
+  "followUp": {
+    "question": "問題 {n}",
+    "scaleLow": "1 = 完全不",
+    "scaleHigh": "10 = 非常",
+    "note": "後續提問只有一輪。你的回答在判決之前都會保密。",
+    "submit": "提交回答",
+    "submitting": "提交中…",
+    "answerAll": "請回答每一個問題才能繼續。"
+  },
+  "waiting": {
+    "snagTitle": "法庭遇到了一點狀況",
+    "retry": "再試一次",
+    "retrying": "重新嘗試中…"
+  },
+  "languageMenu": {
+    "button": "切換語言"
+  },
+  "stages": {
+    "CASE_OPEN": "案件已受理",
+    "TESTIMONY": "作證",
+    "ANALYSIS": "案件分析",
+    "FOLLOW_UP": "後續提問",
+    "PANEL_JUDGEMENT": "審判團評議",
+    "VERDICT": "判決已出",
+    "RECOMMENDATIONS": "建議",
+    "REPORT": "案件報告",
+    "CLOSED": "已結案"
+  },
+  "caseErrors": {
+    "case_already_open": "你們已經有一個進行中的案件。請先完成它，再提出新的案件。",
+    "no_active_couple": "提出案件前，需要先有雙方都已加入的伴侶檔案。",
+    "already_testified": "你已經為這個案件提交過證詞了。",
+    "not_allowed": "目前無法為這個案件提交證詞。",
+    "already_answered": "你已經回答過這個案件的後續提問了。",
+    "invalid": "請檢查你的答案——有些欄位漏填、太短或太長。",
+    "unknown": "出了點問題，請再試一次。"
+  },
+  "inviteErrors": {
+    "invite_invalid": "這個邀請連結看起來不正確。",
+    "invite_used": "這個邀請已經被使用過了。",
+    "invite_expired": "這個邀請已過期。請向你的伴侶索取新的連結。",
+    "invite_own": "你不能加入自己發出的邀請——請把它傳給你的伴侶。",
+    "already_in_couple": "你已經是某個伴侶檔案的成員了。",
+    "no_pending_couple": "你目前沒有正在等待伴侶加入的伴侶檔案。",
+    "unknown": "出了點問題，請再試一次。"
+  },
+  "aiErrors": {
+    "invalid_output": "法庭無法完成案件的閱讀，請再試一次。",
+    "unavailable": "法庭的 AI 目前無法使用，請稍後再試。",
+    "not_configured": "法庭的 AI 尚未設定完成。請加入 DashScope 金鑰後再試一次。"
+  },
+  "frequency": {
+    "first_time": "第一次",
+    "sometimes": "偶爾",
+    "often": "經常"
+  },
+  "trueFalse": {
+    "True": "是",
+    "False": "否",
+    "Unsure": "不確定"
+  },
+  "emotions": {
+    "Angry": "生氣",
+    "Hurt": "受傷",
+    "Sad": "難過",
+    "Ignored": "被忽視",
+    "Disrespected": "不被尊重",
+    "Unappreciated": "不被重視",
+    "Misunderstood": "被誤解",
+    "Frustrated": "挫折",
+    "Disappointed": "失望",
+    "Anxious": "焦慮",
+    "Overwhelmed": "喘不過氣",
+    "Lonely": "孤單",
+    "Betrayed": "被背叛",
+    "Jealous": "嫉妒",
+    "Insecure": "沒安全感",
+    "Embarrassed": "尷尬",
+    "Guilty": "內疚",
+    "Confused": "困惑",
+    "Numb": "麻木",
+    "Other": "其他"
+  },
+  "causes": {
+    "Communication": "溝通",
+    "Expectations": "期待落差",
+    "Assumptions": "主觀臆測",
+    "Trust": "信任",
+    "Stress or tiredness": "壓力或疲憊",
+    "Time and priorities": "時間與優先順序",
+    "Chores or money": "家事或金錢",
+    "Family or friends": "家人或朋友",
+    "Other": "其他"
+  },
+  "needs": {
+    "An apology": "一句道歉",
+    "To be listened to": "被好好傾聽",
+    "A change in behaviour": "改變行為",
+    "Reassurance": "被安撫、給我信心",
+    "Appreciation": "被感謝、被肯定",
+    "Space": "一些空間",
+    "Help": "幫忙",
+    "An explanation": "一個解釋",
+    "Other": "其他"
+  }
+}

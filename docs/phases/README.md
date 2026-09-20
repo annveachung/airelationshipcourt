@@ -96,6 +96,12 @@ The full table design was worked out once and is split across phases so you only
 | `notifications` | 7 |
 | *(no new tables — SQL aggregation over the above)* | 8 |
 
+## Languages (English and Traditional Chinese)
+
+The app is bilingual: a globe icon in the header switches between English and 繁體中文. All screen text lives in `messages/en.json` and `messages/zh-Hant.json` (same keys in both — `npm test` checks this) and is read with `next-intl`; there is no language in the URL. The choice is kept in a cookie and on the profile (`profiles.locale`), so the server can also write AI text in each person's language.
+
+Rules for new screens: never hard-code user-facing text — add a key to **both** message files. Option values (feelings, causes, needs…) stay in English in the database; only their labels are translated. Errors travel as short keys, not sentences.
+
 ## Applying database migrations
 
 Migrations are SQL files in `supabase/migrations/`, named with a timestamp (for example `20260919000002_cases_and_testimony.sql`). Phase docs may still say "paste into the SQL Editor" and use `0003_…`-style names — use a timestamped name instead and apply with the Supabase CLI:

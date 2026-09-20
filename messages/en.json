@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "title": "AI Relationship Court",
+    "description": "Two partners, one disagreement, a structured AI panel, and a verdict."
+  },
+  "shell": {
+    "brand": "AI Relationship Court",
+    "signOut": "Sign out",
+    "language": "Language",
+    "mainNav": "Main navigation"
+  },
+  "nav": {
+    "docket": "Docket",
+    "fileCase": "File Case",
+    "verdicts": "Verdicts"
+  },
+  "roles": {
+    "partnerA": "Partner A",
+    "partnerB": "Partner B",
+    "you": "(you)"
+  },
+  "login": {
+    "badge": "Court clerk",
+    "title": "Please state your name.",
+    "subtitle": "Sign in so the court knows who is testifying.",
+    "google": "Continue with Google",
+    "googleBusy": "Opening Google…",
+    "failed": "Sign-in didn't go through. Please try again."
+  },
+  "couple": {
+    "registry": "Registry",
+    "new": {
+      "title": "Create your couple",
+      "body": "You'll be Partner A. We'll give you a private invite link to send to your partner. Once they join, you can file your first case.",
+      "submit": "Create couple & get invite link"
+    },
+    "invite": {
+      "title": "Invite your partner",
+      "body": "Send this link to your partner. It works once and expires in 7 days.",
+      "expired": "Your previous invite has expired or been used.",
+      "renew": "Create a new invite link",
+      "linkLabel": "Invite link",
+      "copy": "Copy link",
+      "copied": "Copied"
+    }
+  },
+  "join": {
+    "label": "Summons",
+    "title": "You've been invited",
+    "invalid": "That invite link is invalid, already used, or expired. Ask your partner for a new one.",
+    "already": "You're already part of a couple.",
+    "body": "<strong>{inviter}</strong> has invited you to join their court as Partner B.",
+    "submit": "Join the court"
+  },
+  "docket": {
+    "badge": "Court is in session",
+    "title": "Your docket",
+    "noneBody": "Every case needs two parties. Create your couple, then invite your partner.",
+    "createCouple": "Create a couple",
+    "waitingPartner": "Waiting for your partner to join.",
+    "showInvite": "Show invite link",
+    "openCase": "Go to your open case",
+    "fileCase": "File a case",
+    "casesHeading": "Cases",
+    "noCases": "No cases yet. File your first one."
+  },
+  "history": {
+    "label": "Registry",
+    "title": "Verdicts",
+    "body": "Past cases and insights arrive in Phase 8."
+  },
+  "newCase": {
+    "label": "Docket",
+    "title": "File a case",
+    "needCouple": "A case needs both partners. Finish setting up your couple first.",
+    "createCouple": "Create a couple",
+    "invitePartner": "Invite your partner",
+    "alreadyOpen": "You already have an open case: <strong>{title}</strong>. Finish it before filing another.",
+    "goOpen": "Go to your open case",
+    "intro": "Describe what the case is about. The court will name it, then both partners tell their side, privately.",
+    "back": "Back to docket",
+    "fieldLabel": "What is this case about?",
+    "fieldHint": "A sentence or two of neutral background. The court will give the case a title — keep your side of the story for your testimony.",
+    "placeholder": "We argued because one of us cancelled dinner plans at the last minute.",
+    "submit": "File the case",
+    "submitting": "The clerk is naming your case…"
+  },
+  "casePage": {
+    "badge": "Case #{id} · {stage}",
+    "details": "Case details",
+    "testified": "Testified",
+    "notYet": "Not yet",
+    "answered": "Answered",
+    "followUpHeading": "Follow-up questions",
+    "testimonyTitle": "Your testimony",
+    "testimonyIntro": "Tell the court what happened, in your own words. {partner} can't see this until the verdict.",
+    "waitingForPartner": "Waiting for {partner}",
+    "waitingTestimony": "Your testimony is filed. The court will move on as soon as your partner has given theirs. This page updates by itself.",
+    "analysingTitle": "The court is analysing the case",
+    "analysingBody": "Both testimonies are in. The court is reading them and preparing your follow-up questions — this can take up to a minute. This page updates by itself.",
+    "followUpTitle": "The court has a few questions",
+    "followUpIntro": "Having read both accounts, the court needs a little more from you. This is the only round of questions.",
+    "questionsNotReady": "Your questions aren't ready yet. Try refreshing.",
+    "waitingAnswers": "Waiting for {partner}'s answers",
+    "waitingAnswersBody": "Your answers are in. The court will move on as soon as your partner has answered theirs. This page updates by itself.",
+    "panelTitle": "The panel is deliberating",
+    "panelBody": "All the evidence is in. The verdict arrives in the next phase of the build.",
+    "stillBuilding": "This part of the court is still being built."
+  },
+  "testimony": {
+    "whatHappened": "What happened?",
+    "frequencyLegend": "Has this happened before?",
+    "causesLegend": "What do you think caused it?",
+    "emotionsLegend": "How did you feel?",
+    "pickAll": "Pick all that apply",
+    "noteOptional": "Anything to add? (optional)",
+    "severityLegend": "How serious was it?",
+    "severityScale": "(1 = minor, 10 = severe)",
+    "partnerWrong": "What do you think your partner did wrong?",
+    "needsLegend": "What did you want from your partner?",
+    "finalNote": "Your testimony is final once submitted and stays private until the verdict.",
+    "submit": "Submit testimony",
+    "submitting": "Submitting…",
+    "pickHint": "Pick at least one option for feelings, cause and what you needed to continue."
+  },
+  "followUp": {
+    "question": "Q{n}",
+    "scaleLow": "1 = not at all",
+    "scaleHigh": "10 = very much",
+    "note": "You only get one round of follow-up questions. Your answers stay private until the verdict.",
+    "submit": "Submit answers",
+    "submitting": "Submitting…",
+    "answerAll": "Answer every question to continue."
+  },
+  "waiting": {
+    "snagTitle": "The court hit a snag",
+    "retry": "Try again",
+    "retrying": "Trying again…"
+  },
+  "languageMenu": {
+    "button": "Change language"
+  },
+  "stages": {
+    "CASE_OPEN": "Case opened",
+    "TESTIMONY": "Testimony",
+    "ANALYSIS": "Case analysis",
+    "FOLLOW_UP": "Follow-up round",
+    "PANEL_JUDGEMENT": "Panel deliberation",
+    "VERDICT": "Verdict ready",
+    "RECOMMENDATIONS": "Recommendations",
+    "REPORT": "Case report",
+    "CLOSED": "Closed"
+  },
+  "caseErrors": {
+    "case_already_open": "Your couple already has an open case. Finish it before filing another.",
+    "no_active_couple": "You need a couple with both partners before filing a case.",
+    "already_testified": "You've already given your testimony for this case.",
+    "not_allowed": "You can't submit testimony for this case right now.",
+    "already_answered": "You've already answered the follow-up questions for this case.",
+    "invalid": "Please check your answers — some fields are missing, too short or too long.",
+    "unknown": "Something went wrong. Please try again."
+  },
+  "inviteErrors": {
+    "invite_invalid": "That invite link doesn't look right.",
+    "invite_used": "That invite has already been used.",
+    "invite_expired": "That invite has expired. Ask your partner for a new one.",
+    "invite_own": "You can't join your own invite — send it to your partner.",
+    "already_in_couple": "You're already part of a couple.",
+    "no_pending_couple": "You don't have a couple waiting for a partner.",
+    "unknown": "Something went wrong. Please try again."
+  },
+  "aiErrors": {
+    "invalid_output": "The court couldn't finish reading the case. Please try again.",
+    "unavailable": "The court's AI is unavailable right now. Please try again in a moment.",
+    "not_configured": "The court's AI isn't set up yet. Add the DashScope key, then try again."
+  },
+  "frequency": {
+    "first_time": "First time",
+    "sometimes": "Sometimes",
+    "often": "Often"
+  },
+  "trueFalse": {
+    "True": "True",
+    "False": "False",
+    "Unsure": "Unsure"
+  },
+  "emotions": {
+    "Angry": "Angry",
+    "Hurt": "Hurt",
+    "Sad": "Sad",
+    "Ignored": "Ignored",
+    "Disrespected": "Disrespected",
+    "Unappreciated": "Unappreciated",
+    "Misunderstood": "Misunderstood",
+    "Frustrated": "Frustrated",
+    "Disappointed": "Disappointed",
+    "Anxious": "Anxious",
+    "Overwhelmed": "Overwhelmed",
+    "Lonely": "Lonely",
+    "Betrayed": "Betrayed",
+    "Jealous": "Jealous",
+    "Insecure": "Insecure",
+    "Embarrassed": "Embarrassed",
+    "Guilty": "Guilty",
+    "Confused": "Confused",
+    "Numb": "Numb",
+    "Other": "Other"
+  },
+  "causes": {
+    "Communication": "Communication",
+    "Expectations": "Expectations",
+    "Assumptions": "Assumptions",
+    "Trust": "Trust",
+    "Stress or tiredness": "Stress or tiredness",
+    "Time and priorities": "Time and priorities",
+    "Chores or money": "Chores or money",
+    "Family or friends": "Family or friends",
+    "Other": "Other"
+  },
+  "needs": {
+    "An apology": "An apology",
+    "To be listened to": "To be listened to",
+    "A change in behaviour": "A change in behaviour",
+    "Reassurance": "Reassurance",
+    "Appreciation": "Appreciation",
+    "Space": "Space",
+    "Help": "Help",
+    "An explanation": "An explanation",
+    "Other": "Other"
+  }
+}

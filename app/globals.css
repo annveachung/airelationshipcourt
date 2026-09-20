@@ -52,10 +52,15 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
+}
+
+/* Chinese text: no negative/positive tracking (it's designed for Latin letters). */
+html:lang(zh-Hant) body * {
+  letter-spacing: normal;
 }
