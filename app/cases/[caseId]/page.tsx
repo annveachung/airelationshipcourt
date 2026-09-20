@@ -1,12 +1,19 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { FollowUpForm, type FollowUpQuestionRow } from "@/components/court/follow-up-form";
 import { TestimonyForm } from "@/components/court/testimony-form";
+import { TestimoniesView, type TestimonyView } from "@/components/court/testimonies-view";
+import { TranslationGate } from "@/components/court/translation-gate";
+import { VerdictSummary } from "@/components/court/verdict-summary";
 import { WaitingScreen } from "@/components/court/waiting-screen";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageWithSidebar } from "@/components/ui/page";
-import type { CaseStage } from "@/lib/cases/stages";
+import { verdictTextsSchema } from "@/lib/ai/schemas";
+import type { PanelRole } from "@/lib/cases/aggregate";
+import type { VerdictCharges } from "@/lib/cases/charges";
+import { CASE_STAGES, type CaseStage } from "@/lib/cases/stages";
+import type { Locale } from "@/lib/i18n";
 import { getMyCouple } from "@/lib/couples";
 import { toAiErrorKey, toCaseErrorKey } from "@/lib/error-keys";
 import { createClient } from "@/lib/supabase/server";
@@ -149,11 +156,83 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
         <WaitingScreen
           caseId={caseId}
           initial={initial}
+          drive
+          errorKey={toAiErrorKey(theCase.last_error)}
           title={t("panelTitle")}
           message={t("panelBody")}
         />
       </Card>
     );
+  } else if (CASE_STAGES.indexOf(stage) >= CASE_STAGES.indexOf("VERDICT")) {
+    // The verdict is out (Phase 6 will replace this plain page with the designed one).
+    const locale = (await getLocale()) as Locale;
+    const tVerdict = await getTranslations("verdict");
+    const [{ data: verdict }, { data: textRows }, { data: panelRows }, { data: testimonyRows }] =
+      await Promise.all([
+        supabase.from("verdicts").select("*").eq("case_id", caseId).maybeSingle(),
+        supabase.from("verdict_texts").select("locale, content").eq("case_id", caseId),
+        supabase
+          .from("panel_assessments")
+          .select("role, responsibility_partner_a, responsibility_partner_b")
+          .eq("case_id", caseId),
+        supabase
+          .from("testimonies")
+          .select(
+            "user_id, what_happened, frequency, causes, cause_note, emotions, severity, partner_did_wrong, needs, needs_note",
+          )
+          .eq("case_id", caseId),
+      ]);
+
+    // Prefer the viewer's language; fall back to English until a translation exists.
+    const parsed = (row: { content: unknown } | undefined) =>
+      row ? verdictTextsSchema.safeParse(row.content) : undefined;
+    const mine = parsed(textRows?.find((r) => r.locale === locale));
+    const english = parsed(textRows?.find((r) => r.locale === "en"));
+    const texts = mine?.success ? mine.data : english?.success ? english.data : null;
+    const needsTranslation = locale !== "en" && !mine?.success && english?.success === true;
+
+    if (!verdict || !texts) {
+      main = (
+        <Card>
+          <p className="text-body-md text-walnut">{tVerdict("pending")}</p>
+        </Card>
+      );
+    } else {
+      const nameA = iAmA ? couple.me.name : couple.partner.name;
+      const nameB = iAmA ? couple.partner.name : couple.me.name;
+      const idA = iAmA ? couple.me.userId : couple.partner.userId;
+      const idB = iAmA ? couple.partner.userId : couple.me.userId;
+      const panel = Object.fromEntries(
+        (panelRows ?? []).map((r) => [
+          r.role,
+          { a: Number(r.responsibility_partner_a), b: Number(r.responsibility_partner_b) },
+        ]),
+      ) as Partial<Record<PanelRole, { a: number; b: number }>>;
+      const testimonies: TestimonyView[] = [
+        { userId: idA, name: nameA },
+        { userId: idB, name: nameB },
+      ].flatMap(({ userId, name }) => {
+        const row = testimonyRows?.find((x) => x.user_id === userId);
+        return row ? [{ ...row, name } as TestimonyView] : [];
+      });
+
+      main = (
+        <div className="flex flex-col gap-6">
+          {needsTranslation && <TranslationGate caseId={caseId} locale={locale} />}
+          <VerdictSummary
+            names={{ a: nameA, b: nameB }}
+            finalA={Number(verdict.final_responsibility_a)}
+            finalB={Number(verdict.final_responsibility_b)}
+            moreResponsible={verdict.more_responsible}
+            decidedBy={verdict.decided_by}
+            texts={texts}
+            charges={verdict.charges as VerdictCharges}
+            panel={panel}
+          />
+          {testimonies.length > 0 && <TestimoniesView testimonies={testimonies} />}
+        </div>
+      );
+    }
   } else {
     main = (
       <Card>

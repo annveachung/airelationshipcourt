@@ -1,5 +1,7 @@
 # Phase 5 — AI Panel & Verdict
 
+> **Updated while building:** the verdict is bilingual. Shared text is written once in English and a separate AI call translates it into Traditional Chinese when either partner uses it (or lazily when someone switches language later). Text refers to the partners as `[[A]]` / `[[B]]`, swapped for real names only when shown. Charges are a mix: 1–2 picked from a fixed list of 20 (translated in `messages/*.json`) plus one AI-written custom charge per partner. Tone is warm and witty; custom charges may be cheekier, with guardrails. Every prompt carries a safety rule for abuse or threats. Tables: `panel_assessments`, `verdicts`, `verdict_texts` (migration `20260922000002_panel_and_verdict.sql`). The panel runs in parallel, the whole chain takes roughly 30–45 seconds, and the tie-break falls back from the Jury to the other two members and finally to Partner A so there is always a winner.
+
 ## 1. Goal
 
 After the follow-up round, three independent AI panel members — Jury, Family Counsellor, Social Worker — each assess the case and each assign a responsibility split. **The backend, not any model, combines those into the final percentage.** A synthesis step then writes the verdict narrative around numbers that are already fixed. The case advances to `VERDICT` with a stored, reproducible result. The polished verdict screen comes in Phase 6; this phase ends with a functional (plain) result page.

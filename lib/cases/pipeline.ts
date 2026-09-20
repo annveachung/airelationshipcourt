@@ -4,13 +4,29 @@ import "server-only";
 import { runStructured } from "@/lib/ai/run";
 import { analysisMessages } from "@/lib/ai/prompts/analysis";
 import { followUpMessages } from "@/lib/ai/prompts/follow-up";
-import type { PartnerTestimony } from "@/lib/ai/prompts/format";
-import { analysisSchema, questionsSchema, type Analysis } from "@/lib/ai/schemas";
+import type { FollowUpQA, PartnerTestimony } from "@/lib/ai/prompts/format";
+import { panelMessages } from "@/lib/ai/prompts/panel";
+import { synthesisMessages } from "@/lib/ai/prompts/synthesis";
+import { translateMessages } from "@/lib/ai/prompts/translate";
+import {
+  analysisSchema,
+  panelAssessmentSchema,
+  questionsSchema,
+  synthesisSchema,
+  translationSchemaFor,
+  verdictTextsSchema,
+  type Analysis,
+  type PanelAssessment,
+  type VerdictTexts,
+} from "@/lib/ai/schemas";
+import { aggregate, PANEL_ROLES, type PanelRole } from "./aggregate";
+import { CHARGE_IDS } from "./charges";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { createServiceClient } from "@/lib/supabase/service";
 import { setCaseError, transition } from "./state-machine";
 
-export type StepResult = "advanced" | "in_progress" | "failed";
+// "continue" = more work remains; the poller will call again.
+export type StepResult = "advanced" | "in_progress" | "failed" | "continue";
 
 type TestimonyRow = {
   user_id: string;
@@ -156,5 +172,247 @@ export async function runAnalysisStep(caseId: string): Promise<StepResult> {
 
   await setCaseError(caseId, null);
   await transition(caseId, "ANALYSIS", "FOLLOW_UP");
+  return "advanced";
+}
+
+// ---------------------------------------------------------------------------
+// PANEL_JUDGEMENT: three independent panel members -> backend aggregation ->
+// synthesis -> translations -> VERDICT. Every sub-step is saved to the database,
+// so a call that runs out of time simply resumes on the next one.
+// ---------------------------------------------------------------------------
+
+const TIME_BUDGET_MS = 30_000; // don't START another long AI call after this (route limit is 60s)
+
+async function loadFollowUps(caseId: string, userA: string, userB: string) {
+  const db = createServiceClient();
+  const { data: questions } = await db
+    .from("follow_up_questions")
+    .select("id, user_id, position, question_text, format")
+    .eq("case_id", caseId)
+    .order("position");
+  const { data: answers } = await db
+    .from("follow_up_answers")
+    .select("question_id, answer_text, answer_choice, answer_rating")
+    .eq("case_id", caseId);
+
+  const toQA = (userId: string): FollowUpQA[] =>
+    (questions ?? [])
+      .filter((q) => q.user_id === userId)
+      .map((q) => {
+        const a = answers?.find((x) => x.question_id === q.id);
+        const answer =
+          a?.answer_rating != null ? `${a.answer_rating} out of 10` : (a?.answer_choice ?? a?.answer_text ?? "(no answer)");
+        return { question: q.question_text, answer };
+      });
+  return { a: toQA(userA), b: toQA(userB) };
+}
+
+/** The English texts a person reads: the synthesis, the panel summaries, and the custom charges. */
+function assembleEnglishTexts(s: ReturnType<typeof synthesisSchema.parse>, panel: Record<PanelRole, PanelAssessment>): VerdictTexts {
+  return {
+    verdict_text: s.verdict_text,
+    primary_issue: s.primary_issue,
+    underlying_issue: s.underlying_issue,
+    main_escalation_factor: s.main_escalation_factor,
+    biggest_misunderstanding: s.biggest_misunderstanding,
+    feedback_partner_a: s.feedback_partner_a,
+    feedback_partner_b: s.feedback_partner_b,
+    joint_feedback: s.joint_feedback,
+    suggestion_partner_a: s.suggestion_partner_a,
+    suggestion_partner_b: s.suggestion_partner_b,
+    suggestion_together: s.suggestion_together,
+    charge_custom_a: s.charge_custom_a,
+    charge_custom_b: s.charge_custom_b,
+    summary_jury: panel.jury.reasoning_summary,
+    summary_family_counsellor: panel.family_counsellor.reasoning_summary,
+    summary_social_worker: panel.social_worker.reasoning_summary,
+  };
+}
+
+/** Translates the English verdict texts into `locale` (idempotent; used here and by the lazy route). */
+export async function ensureTranslation(caseId: string, locale: Locale): Promise<"ok" | "in_progress" | "failed"> {
+  if (locale === "en") return "ok";
+  const db = createServiceClient();
+
+  const { data: have } = await db.from("verdict_texts").select("locale").eq("case_id", caseId).eq("locale", locale).maybeSingle();
+  if (have) return "ok";
+
+  const { data: en } = await db.from("verdict_texts").select("content").eq("case_id", caseId).eq("locale", "en").maybeSingle();
+  if (!en) return "failed";
+  const original = verdictTextsSchema.parse(en.content);
+
+  const { system, user } = translateMessages(original, locale);
+  const result = await runStructured({
+    caseId,
+    stage: "translation",
+    subKey: locale,
+    schema: translationSchemaFor(original),
+    system,
+    user,
+    temperature: 0.3,
+    maxTokens: 3000,
+  });
+  if (result.kind === "in_progress") return "in_progress";
+  if (result.kind === "failed") return "failed";
+
+  const { error } = await db.from("verdict_texts").upsert({ case_id: caseId, locale, content: result.data });
+  if (error) {
+    console.error("save translation failed:", caseId, error.code);
+    return "failed";
+  }
+  return "ok";
+}
+
+export async function runPanelStep(caseId: string): Promise<StepResult> {
+  const startedAt = Date.now();
+  const db = createServiceClient();
+
+  const loaded = await loadCase(caseId);
+  const { data: analysisRow } = await db.from("case_analyses").select("*").eq("case_id", caseId).maybeSingle();
+  if (!loaded || !analysisRow) {
+    await setCaseError(caseId, FRIENDLY.unavailable);
+    return "failed";
+  }
+  const analysis = analysisSchema.parse(analysisRow);
+
+  // 1. The three panel members, in parallel. Members who already finished are skipped.
+  const { data: saved } = await db.from("panel_assessments").select("role").eq("case_id", caseId);
+  const done = new Set((saved ?? []).map((r) => r.role as PanelRole));
+  const missing = PANEL_ROLES.filter((r) => !done.has(r));
+
+  if (missing.length > 0) {
+    const followUps = await loadFollowUps(caseId, loaded.userA, loaded.userB);
+    const outcomes = await Promise.all(
+      missing.map(async (role) => {
+        const { system, user } = panelMessages(role, loaded.a, loaded.b, analysis, followUps);
+        const result = await runStructured({
+          caseId,
+          stage: "panel",
+          subKey: role,
+          schema: panelAssessmentSchema,
+          system,
+          user,
+          temperature: 0.6,
+        });
+        if (result.kind !== "ok") return result;
+
+        const { responsibility_partner_a: a, responsibility_partner_b: b, ...content } = result.data;
+        const { error } = await db.from("panel_assessments").upsert(
+          {
+            case_id: caseId,
+            role,
+            responsibility_partner_a: a,
+            responsibility_partner_b: b,
+            content,
+            model: process.env.DASHSCOPE_MODEL ?? null,
+          },
+          { onConflict: "case_id,role", ignoreDuplicates: true },
+        );
+        if (error) console.error("save panel failed:", caseId, role, error.code);
+        return error ? ({ kind: "failed", reason: "unavailable" } as const) : result;
+      }),
+    );
+
+    const failed = outcomes.find((o) => o.kind === "failed");
+    if (failed && failed.kind === "failed") {
+      await setCaseError(caseId, FRIENDLY[failed.reason]);
+      return "failed";
+    }
+    if (outcomes.some((o) => o.kind === "in_progress")) return "in_progress";
+    if (Date.now() - startedAt > TIME_BUDGET_MS) return "continue";
+  }
+
+  // 2. Aggregate in code (never by a model) and save the numbers BEFORE any narration.
+  const { data: rows } = await db.from("panel_assessments").select("role, responsibility_partner_a, responsibility_partner_b, content").eq("case_id", caseId);
+  if (!rows || rows.length < PANEL_ROLES.length) return "in_progress";
+
+  const scores = Object.fromEntries(
+    rows.map((r) => [r.role, { a: Number(r.responsibility_partner_a), b: Number(r.responsibility_partner_b) }]),
+  ) as Record<PanelRole, { a: number; b: number }>;
+  const result = aggregate(scores);
+
+  const { data: existingVerdict } = await db.from("verdicts").select("case_id").eq("case_id", caseId).maybeSingle();
+  if (!existingVerdict) {
+    const { error } = await db.from("verdicts").insert({
+      case_id: caseId,
+      final_responsibility_a: result.finalA,
+      final_responsibility_b: result.finalB,
+      more_responsible: result.moreResponsible,
+      decided_by: result.decidedBy,
+    });
+    if (error && error.code !== "23505") {
+      console.error("save verdict failed:", caseId, error.code);
+      await setCaseError(caseId, FRIENDLY.unavailable);
+      return "failed";
+    }
+  }
+
+  // 3. Synthesis: the verdict narrative, written around the already-fixed numbers.
+  const { data: enRow } = await db.from("verdict_texts").select("case_id").eq("case_id", caseId).eq("locale", "en").maybeSingle();
+  if (!enRow) {
+    if (Date.now() - startedAt > TIME_BUDGET_MS) return "continue";
+
+    const assessments = Object.fromEntries(
+      rows.map((r) => [
+        r.role,
+        panelAssessmentSchema.parse({
+          responsibility_partner_a: r.responsibility_partner_a,
+          responsibility_partner_b: r.responsibility_partner_b,
+          ...(r.content as object),
+        }),
+      ]),
+    ) as Record<PanelRole, PanelAssessment>;
+
+    const { system, user } = synthesisMessages({
+      assessments,
+      finalA: result.finalA,
+      finalB: result.finalB,
+      moreResponsible: result.moreResponsible,
+    });
+    const synthesis = await runStructured({
+      caseId,
+      stage: "synthesis",
+      schema: synthesisSchema,
+      system,
+      user,
+      temperature: 0.8,
+      maxTokens: 2500,
+    });
+    if (synthesis.kind === "in_progress") return "in_progress";
+    if (synthesis.kind === "failed") {
+      await setCaseError(caseId, FRIENDLY[synthesis.reason]);
+      return "failed";
+    }
+
+    const s = synthesis.data;
+    const validIds = new Set<string>(CHARGE_IDS);
+    const clean = (ids: string[]) => ids.filter((id) => validIds.has(id));
+    const { error: textError } = await db.from("verdict_texts").upsert({
+      case_id: caseId,
+      locale: "en",
+      content: assembleEnglishTexts(s, assessments),
+    });
+    const { error: chargeError } = await db
+      .from("verdicts")
+      .update({ charges: { a: clean(s.charge_ids_a), b: clean(s.charge_ids_b), both: clean(s.charge_ids_both) } })
+      .eq("case_id", caseId);
+    if (textError || chargeError) {
+      console.error("save synthesis failed:", caseId, textError?.code, chargeError?.code);
+      await setCaseError(caseId, FRIENDLY.unavailable);
+      return "failed";
+    }
+  }
+
+  // 4. Translations for anyone whose language isn't English. A failure here never blocks
+  //    the verdict: the page translates lazily later.
+  const wanted = [...new Set([loaded.languages.a, loaded.languages.b])].filter((l) => l !== "en");
+  for (const locale of wanted) {
+    if (Date.now() - startedAt > TIME_BUDGET_MS) break;
+    const outcome = await ensureTranslation(caseId, locale);
+    if (outcome === "failed") console.error("translation failed (will retry lazily):", caseId, locale);
+  }
+
+  await setCaseError(caseId, null);
+  await transition(caseId, "PANEL_JUDGEMENT", "VERDICT");
   return "advanced";
 }

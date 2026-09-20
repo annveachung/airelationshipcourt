@@ -1,6 +1,8 @@
 // No server-only import: pure and unit-tested. Schemas are deliberately SHALLOW —
 // Qwen's JSON gets less reliable the deeper the nesting goes.
 import { z } from "zod";
+import { CHARGE_IDS, type ChargeId } from "@/lib/cases/charges";
+import { placeholdersIn } from "./names";
 
 // Models sometimes return a lone string where a list is expected.
 const list = (maxItems: number, maxLength: number) =>
@@ -69,3 +71,96 @@ export const questionsSchema = z.object({
   partner_b: partnerQuestions,
 });
 export type FollowUpQuestions = z.infer<typeof questionsSchema>;
+
+// ---------------------------------------------------------------------------
+// Phase 5: panel assessments, the verdict synthesis, and its translations.
+// All flat (no nesting beyond simple lists) because Qwen's JSON is shakier when deep.
+// ---------------------------------------------------------------------------
+
+// Scores can arrive as 60, "60" or "60%"; keep them in 0-100.
+const score = z.preprocess(
+  (v) => (typeof v === "string" ? Number.parseFloat(v.replace("%", "")) : v),
+  z.number().finite().transform((n) => Math.min(100, Math.max(0, n))),
+);
+
+export const panelAssessmentSchema = z.object({
+  responsibility_partner_a: score,
+  responsibility_partner_b: score,
+  primary_issue: short(80),
+  secondary_issues: list(3, 80),
+  reasoning_summary: short(700),
+  feedback_partner_a: short(400),
+  feedback_partner_b: short(400),
+  recommendations: list(3, 200),
+});
+export type PanelAssessment = z.infer<typeof panelAssessmentSchema>;
+
+const chargeIds = (max: number) =>
+  z.preprocess(
+    (v) => (typeof v === "string" ? [v] : v),
+    z.array(z.enum(CHARGE_IDS)).min(1).max(max),
+  );
+
+export const synthesisSchema = z.object({
+  verdict_text: short(700),
+  primary_issue: short(200),
+  underlying_issue: short(200),
+  main_escalation_factor: short(200),
+  biggest_misunderstanding: short(400),
+  feedback_partner_a: short(400),
+  feedback_partner_b: short(400),
+  joint_feedback: short(400),
+  suggestion_partner_a: short(300),
+  suggestion_partner_b: short(300),
+  suggestion_together: short(300),
+  charge_ids_a: chargeIds(2),
+  charge_custom_a: short(80),
+  charge_ids_b: chargeIds(2),
+  charge_custom_b: short(80),
+  charge_ids_both: chargeIds(2),
+});
+export type Synthesis = z.infer<typeof synthesisSchema>;
+
+// Everything a person reads, in ONE language. English is assembled from the synthesis and
+// the panel; other languages come from translating this same shape.
+export const VERDICT_TEXT_KEYS = [
+  "verdict_text",
+  "primary_issue",
+  "underlying_issue",
+  "main_escalation_factor",
+  "biggest_misunderstanding",
+  "feedback_partner_a",
+  "feedback_partner_b",
+  "joint_feedback",
+  "suggestion_partner_a",
+  "suggestion_partner_b",
+  "suggestion_together",
+  "charge_custom_a",
+  "charge_custom_b",
+  "summary_jury",
+  "summary_family_counsellor",
+  "summary_social_worker",
+] as const;
+export type VerdictTextKey = (typeof VERDICT_TEXT_KEYS)[number];
+
+export const verdictTextsSchema = z.object(
+  Object.fromEntries(VERDICT_TEXT_KEYS.map((k) => [k, short(800)])) as Record<VerdictTextKey, z.ZodString>,
+);
+export type VerdictTexts = z.infer<typeof verdictTextsSchema>;
+
+/** A translation must have every key and keep the [[A]]/[[B]] placeholders the original had. */
+export function translationSchemaFor(original: VerdictTexts) {
+  return verdictTextsSchema.superRefine((translated, ctx) => {
+    for (const key of VERDICT_TEXT_KEYS) {
+      const want = placeholdersIn(original[key]);
+      const got = placeholdersIn(translated[key]);
+      for (const p of want) {
+        if (!got.has(p)) {
+          ctx.addIssue({ code: "custom", path: [key], message: `lost the [[${p}]] placeholder` });
+        }
+      }
+    }
+  });
+}
+
+export type { ChargeId };

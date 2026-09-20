@@ -16,6 +16,9 @@ type Status = {
   failed: boolean;
 };
 
+// Stages where the server does AI work that this screen should keep nudging along.
+const DRIVEN_STAGES = ["ANALYSIS", "PANEL_JUDGEMENT"];
+
 // Polls a tiny status endpoint every few seconds and refreshes the page when
 // something changes. Pauses while the tab is hidden. With `drive`, it also asks the
 // server to run the next AI step (both partners may do this; the server allows one run).
@@ -77,7 +80,7 @@ export function WaitingScreen({
         last.current = next;
         if (changed) {
           router.refresh();
-        } else if (drive && next.stage === "ANALYSIS" && !next.failed) {
+        } else if (drive && DRIVEN_STAGES.includes(next.stage) && !next.failed) {
           void advance();
         }
       } catch {

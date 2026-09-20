@@ -6,7 +6,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { AI_MODEL, createAiClient, withoutThinking } from "./client";
 import { extractJson } from "./json";
 
-export type AiStageName = "analysis" | "follow_up_questions" | "panel" | "synthesis";
+export type AiStageName = "analysis" | "follow_up_questions" | "panel" | "synthesis" | "translation";
 
 export type RunResult<T> =
   | { kind: "ok"; data: T }
