@@ -21,13 +21,31 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/cases/[case
 
   // The database function checks that the caller belongs to this case's couple.
   const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
-  const row = (data as { stage: string; a_submitted: boolean; b_submitted: boolean }[] | null)?.[0];
+  const row = (
+    data as
+      | {
+          stage: string;
+          a_submitted: boolean;
+          b_submitted: boolean;
+          a_followed_up: boolean;
+          b_followed_up: boolean;
+          failed: boolean;
+        }[]
+      | null
+  )?.[0];
   if (!row) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
   return NextResponse.json(
-    { stage: row.stage, aSubmitted: row.a_submitted, bSubmitted: row.b_submitted },
+    {
+      stage: row.stage,
+      aSubmitted: row.a_submitted,
+      bSubmitted: row.b_submitted,
+      aFollowedUp: row.a_followed_up,
+      bFollowedUp: row.b_followed_up,
+      failed: row.failed,
+    },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

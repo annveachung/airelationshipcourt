@@ -1,6 +1,6 @@
 import "server-only";
 import { LIMITS } from "@/lib/cases/testimony";
-import { AI_MODEL, aiConfigured, createAiClient } from "./client";
+import { AI_MODEL, aiConfigured, createAiClient, withoutThinking } from "./client";
 
 const SYSTEM_PROMPT = `You name court cases for a lighthearted "relationship court" app.
 Write ONE short case title (3 to 7 words) in the style of a courtroom docket, gently playful
@@ -33,15 +33,17 @@ export async function generateCaseTitle(context: string): Promise<string> {
   if (!aiConfigured()) return fallbackTitle(context);
 
   try {
-    const res = await createAiClient().chat.completions.create({
-      model: AI_MODEL,
-      temperature: 0.8,
-      max_tokens: 40,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `<context>\n${context}\n</context>` },
-      ],
-    });
+    const res = await createAiClient().chat.completions.create(
+      withoutThinking({
+        model: AI_MODEL,
+        temperature: 0.8,
+        max_tokens: 40,
+        messages: [
+          { role: "system" as const, content: SYSTEM_PROMPT },
+          { role: "user" as const, content: `<context>\n${context}\n</context>` },
+        ],
+      }),
+    );
     const title = tidy(res.choices[0]?.message?.content ?? "");
     return title.length >= 3 ? title : fallbackTitle(context);
   } catch (error) {

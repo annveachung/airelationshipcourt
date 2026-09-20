@@ -98,3 +98,66 @@ export async function submitTestimony(formData: FormData) {
   revalidatePath("/");
   redirect(caseUrl);
 }
+
+const ANSWER_MAX = 500;
+
+export async function submitFollowUp(formData: FormData) {
+  const caseId = String(formData.get("caseId") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(caseId)) redirect("/");
+  const caseUrl = `/cases/${caseId}`;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  // Row Level Security only lets me read MY questions.
+  const { data: questions } = await supabase
+    .from("follow_up_questions")
+    .select("id, format, options")
+    .eq("case_id", caseId)
+    .eq("user_id", user.id);
+  if (!questions || questions.length === 0) redirect(`${caseUrl}?error=not_allowed`);
+
+  // Validate every answer against its own question, server-side.
+  const answers: Record<string, string | number>[] = [];
+  for (const q of questions) {
+    const raw = String(formData.get(`q_${q.id}`) ?? "").trim();
+    if (q.format === "rating_1_10") {
+      const n = Number(raw);
+      if (!Number.isInteger(n) || n < 1 || n > 10) redirect(`${caseUrl}?error=invalid`);
+      answers.push({ question_id: q.id, answer_rating: n });
+    } else if (q.format === "short_answer") {
+      if (raw.length < 1 || raw.length > ANSWER_MAX) redirect(`${caseUrl}?error=invalid`);
+      answers.push({ question_id: q.id, answer_text: raw });
+    } else {
+      const options = (q.options as string[] | null) ?? [];
+      if (!options.includes(raw)) redirect(`${caseUrl}?error=invalid`);
+      answers.push({ question_id: q.id, answer_choice: raw });
+    }
+  }
+
+  // One transaction in the database: the submission marker plus every answer.
+  const { error } = await supabase.rpc("submit_follow_up", { the_case: caseId, answers });
+  if (error) {
+    console.error("submit_follow_up failed:", error.message, "case", caseId, "user", user.id);
+    const key = error.message.includes("already_answered")
+      ? "already_answered"
+      : error.message.includes("not_allowed")
+        ? "not_allowed"
+        : "invalid";
+    redirect(`${caseUrl}?error=${key}`);
+  }
+
+  // If both partners have now answered, hand the case to the panel (compare-and-swap is race-safe).
+  const { data: status } = await supabase.rpc("case_submission_status", { the_case: caseId });
+  const row = (status as { a_followed_up: boolean; b_followed_up: boolean }[] | null)?.[0];
+  if (row?.a_followed_up && row?.b_followed_up) {
+    await transition(caseId, "FOLLOW_UP", "PANEL_JUDGEMENT");
+  }
+
+  revalidatePath(caseUrl);
+  revalidatePath("/");
+  redirect(caseUrl);
+}

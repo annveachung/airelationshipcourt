@@ -1,5 +1,7 @@
 # Phase 4 — AI Analysis & Follow-up
 
+> **Updated while building:** 3 follow-up questions per partner (not 3–5), mostly quick-pick (at most 1 free-text answer each), each tied to a `topic` from the analysis. Answers are saved by a single `submit_follow_up()` database function (one transaction), `case_submission_status()` now also reports follow-up progress and AI failure, and the analysis also returns `primary_issue`, `secondary_issue` and `conflict_type` for Phase 7's case profile. Vitest was added for the JSON extractor and schemas (`npm test`). Migration: `20260921000001_analysis_and_followup.sql`.
+
 ## 1. Goal
 
 Once both testimonies are in, the court reads them, produces a structured case analysis, and asks each partner a short set of targeted follow-up questions. Each partner answers once; that is the only follow-up round there will ever be. This is the phase that proves the riskiest part of the app — getting reliable structured output out of Qwen — so the AI plumbing is built and hardened here, before the panel in Phase 5.
