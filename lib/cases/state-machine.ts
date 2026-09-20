@@ -22,7 +22,12 @@ const ALLOWED: Record<CaseStage, CaseStage[]> = {
  * Returns false when someone else already advanced it (normal when both
  * partners act at the same moment) — that is not an error.
  */
-export async function transition(caseId: string, from: CaseStage, to: CaseStage): Promise<boolean> {
+export async function transition(
+  caseId: string,
+  from: CaseStage,
+  to: CaseStage,
+  options: { closedReason?: "treaty" | "adjourned" } = {},
+): Promise<boolean> {
   if (!ALLOWED[from].includes(to)) {
     throw new Error(`Illegal case transition: ${from} -> ${to}`);
   }
@@ -35,7 +40,7 @@ export async function transition(caseId: string, from: CaseStage, to: CaseStage)
       stage_entered_at: now,
       updated_at: now,
       last_error: null,
-      ...(to === "CLOSED" ? { closed_at: now } : {}),
+      ...(to === "CLOSED" ? { closed_at: now, closed_reason: options.closedReason ?? null } : {}),
     })
     .eq("id", caseId)
     .eq("stage", from)

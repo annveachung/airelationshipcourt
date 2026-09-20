@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import { ANALYSIS_EXAMPLE } from "./prompts/analysis";
 import { QUESTIONS_EXAMPLE } from "./prompts/follow-up";
 import { PANEL_EXAMPLE } from "./prompts/panel";
+import { REPORT_EXAMPLE } from "./prompts/report";
 import { SYNTHESIS_EXAMPLE } from "./prompts/synthesis";
 import {
   analysisSchema,
   panelAssessmentSchema,
   questionsSchema,
+  REPORT_TEXT_KEYS,
+  reportTextsSchema,
+  reportTranslationSchemaFor,
   synthesisSchema,
   translationSchemaFor,
   VERDICT_TEXT_KEYS,
@@ -154,5 +158,27 @@ describe("translationSchemaFor", () => {
     const { joint_feedback: _omit, ...rest } = original;
     void _omit;
     expect(translationSchemaFor(original).safeParse(rest).success).toBe(false);
+  });
+});
+
+describe("report writer", () => {
+  it("prompt example parses", () => {
+    expect(reportTextsSchema.safeParse(REPORT_EXAMPLE).success).toBe(true);
+  });
+  it("turns a list into a newline-separated string", () => {
+    const parsed = reportTextsSchema.parse({ ...REPORT_EXAMPLE, emotional_themes: ["A: hurt", "B: stressed"] });
+    expect(parsed.emotional_themes).toBe("A: hurt\nB: stressed");
+  });
+  it("needs all three treaty clauses", () => {
+    const { treaty_personal_3: _omit, ...rest } = REPORT_EXAMPLE;
+    void _omit;
+    expect(reportTextsSchema.safeParse(rest).success).toBe(false);
+  });
+  it("a report translation must keep the key set and placeholders", () => {
+    const original = reportTextsSchema.parse(REPORT_EXAMPLE);
+    const schema = reportTranslationSchemaFor(original);
+    const good = Object.fromEntries(REPORT_TEXT_KEYS.map((k) => [k, original[k].replaceAll("[[A]]", "[[A]]")]));
+    expect(schema.safeParse(good).success).toBe(true);
+    expect(schema.safeParse({ ...good, case_summary: "沒有代稱的摘要" }).success).toBe(false);
   });
 });

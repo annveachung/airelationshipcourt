@@ -94,7 +94,7 @@ export default async function Home() {
                 {cases.map((c) => (
                   <li key={c.id}>
                     <Link
-                      href={`/cases/${c.id}`}
+                      href={c.stage === "CLOSED" ? `/cases/${c.id}/report` : `/cases/${c.id}`}
                       className="flex min-h-14 items-center justify-between gap-3 rounded-card border border-hairline bg-surface px-4 py-3 shadow-card focus-visible:outline-2 focus-visible:outline-espresso"
                     >
                       <span className="min-w-0 truncate text-body-md font-medium text-espresso">

@@ -105,7 +105,8 @@
     "waitingAnswersBody": "Your answers are in. The court will move on as soon as your partner has answered theirs. This page updates by itself.",
     "panelTitle": "The panel is deliberating",
     "panelBody": "All the evidence is in. The verdict arrives in the next phase of the build.",
-    "stillBuilding": "This part of the court is still being built."
+    "stillBuilding": "This part of the court is still being built.",
+    "backToCase": "Back to the case"
   },
   "testimony": {
     "whatHappened": "What happened?",
@@ -158,7 +159,9 @@
     "not_allowed": "You can't submit testimony for this case right now.",
     "already_answered": "You've already answered the follow-up questions for this case.",
     "invalid": "Please check your answers — some fields are missing, too short or too long.",
-    "unknown": "Something went wrong. Please try again."
+    "unknown": "Something went wrong. Please try again.",
+    "already_signed": "You've already signed this treaty.",
+    "report_not_ready": "The report isn't ready yet. Give it a moment."
   },
   "inviteErrors": {
     "invite_invalid": "That invite link doesn't look right.",
@@ -253,7 +256,12 @@
     "severity": "Seriousness (1-10)",
     "causeNote": "Note on the cause",
     "needsNote": "Note on what they wanted",
-    "pending": "The verdict is ready, but its text isn't available yet. Try refreshing."
+    "pending": "The verdict is ready, but its text isn't available yet. Try refreshing.",
+    "decree": "Official decree · Case #{id}",
+    "responsibility": "Responsibility",
+    "continueAdvice": "Continue to the court's advice",
+    "panelScores": "{a} {pa}% · {b} {pb}%",
+    "panelTap": "Tap a member to read their view"
   },
   "panelRoles": {
     "jury": "Jury",
@@ -281,5 +289,91 @@
     "interrupting": "Interrupting",
     "tone_of_voice": "That Tone of Voice",
     "forgot_the_thing": "Forgetting the Thing"
+  },
+  "stepper": {
+    "label": "Progress",
+    "verdict": "Verdict",
+    "advice": "Advice",
+    "report": "Report",
+    "treaty": "Treaty"
+  },
+  "advice": {
+    "title": "The court's advice",
+    "intro": "Kind words, honest words, and a few charges. Read them with a sense of humour.",
+    "forYou": "For you",
+    "forPartner": "For {name}",
+    "suggestion": "Suggestion",
+    "jointTitle": "For both of you",
+    "chargesTitle": "The charges",
+    "chargesIntro": "Playful, and only about behaviour. No permanent records.",
+    "continueReport": "Continue to the case report",
+    "preparing": "The clerk is still writing up the report…"
+  },
+  "report": {
+    "title": "Case report",
+    "docket": "Case report · Case #{id}",
+    "preparing": "The clerk is writing up the case report…",
+    "prepareFailed": "The report couldn't be prepared just now. Please refresh in a moment.",
+    "pending": "The report isn't ready yet. Try refreshing in a moment.",
+    "print": "Print or save as PDF",
+    "caseSummary": "Case summary",
+    "primaryConflict": "Primary conflict",
+    "secondaryIssues": "Secondary issues",
+    "emotionalThemes": "Emotional themes",
+    "keyDiscrepancies": "Key discrepancies",
+    "followUpFindings": "Follow-up findings",
+    "panelPerspectives": "Panel perspectives",
+    "panelAgreement": "Panel agreement",
+    "charges": "Charges",
+    "finalResponsibility": "Final responsibility",
+    "finalVerdict": "Final verdict",
+    "courtSummary": "Court summary",
+    "feedback": "Feedback",
+    "agreement": {
+      "unanimous_a": "All three panel members found {a} more responsible.",
+      "unanimous_b": "All three panel members found {b} more responsible.",
+      "split_a": "Two of three panel members found {a} more responsible.",
+      "split_b": "Two of three panel members found {b} more responsible.",
+      "level": "The panel was evenly split."
+    }
+  },
+  "treaty": {
+    "title": "The Peace Treaty",
+    "intro": "To close this case, each of you signs. Tick the clauses you agree to — only the first is required.",
+    "required": "I accept the court's ruling (even the parts I dislike).",
+    "optionalHeading": "Optional clauses",
+    "personalHeading": "Written by the court for the two of you",
+    "clauses": {
+      "hug": "We will hug for at least 20 seconds. No side-hugs.",
+      "snacks": "Snacks will be offered as a peace offering.",
+      "old_grudges": "The old grudges are officially retired."
+    },
+    "sign": "Sign the treaty",
+    "signing": "Signing…",
+    "signedBy": "Signed: {name}",
+    "youSigned": "You've signed. Waiting for {name}.",
+    "waitingTitle": "Waiting for {name} to sign",
+    "waitingBody": "Your signature is on the treaty. The case closes as soon as your partner signs too. This page updates by itself.",
+    "adjourn": "Adjourn without a treaty",
+    "adjournTitle": "Close the case without a treaty?",
+    "adjournBody": "The case closes for both of you and you can file a new one. There will be no treaty.",
+    "adjournConfirm": "Yes, adjourn the case"
+  },
+  "closed": {
+    "stamp": "Case closed",
+    "treatyTitle": "Treaty signed",
+    "signedBy": "Signed by {a} and {b}",
+    "adjournedTitle": "Case adjourned",
+    "adjournedBody": "The court adjourned this case without a treaty. Nobody signed, and nobody is in trouble.",
+    "peaceMeter": "Peace-o-meter",
+    "peaceLevel": "{agreed} of {possible} optional clauses agreed",
+    "band": {
+      "frosty": "The air is frosty. The court strongly advises snacks.",
+      "thawing": "The ice is thawing. Baby steps count.",
+      "warm": "Warm and cooperative. The court is cautiously optimistic.",
+      "lovebirds": "Peak lovebirds. The court is blushing."
+    },
+    "fileNew": "File a new case",
+    "viewReport": "View the case report"
   }
 }

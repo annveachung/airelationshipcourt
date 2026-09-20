@@ -148,12 +148,13 @@ export const verdictTextsSchema = z.object(
 );
 export type VerdictTexts = z.infer<typeof verdictTextsSchema>;
 
-/** A translation must have every key and keep the [[A]]/[[B]] placeholders the original had. */
-export function translationSchemaFor(original: VerdictTexts) {
-  return verdictTextsSchema.superRefine((translated, ctx) => {
-    for (const key of VERDICT_TEXT_KEYS) {
+/** Builds a schema for a translation: every key present, and the [[A]]/[[B]] placeholders kept. */
+export function makeTranslationSchema<K extends string>(keys: readonly K[], original: Record<K, string>) {
+  const shape = Object.fromEntries(keys.map((k) => [k, short(800)])) as Record<K, z.ZodString>;
+  return z.object(shape).superRefine((translated, ctx) => {
+    for (const key of keys) {
       const want = placeholdersIn(original[key]);
-      const got = placeholdersIn(translated[key]);
+      const got = placeholdersIn((translated as Record<K, string>)[key]);
       for (const p of want) {
         if (!got.has(p)) {
           ctx.addIssue({ code: "custom", path: [key], message: `lost the [[${p}]] placeholder` });
@@ -161,6 +162,53 @@ export function translationSchemaFor(original: VerdictTexts) {
       }
     }
   });
+}
+
+/** A verdict translation. */
+export function translationSchemaFor(original: VerdictTexts) {
+  return makeTranslationSchema(VERDICT_TEXT_KEYS, original);
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: the written report and the personalised treaty clauses (flat strings).
+// List-like fields are newline-separated so they stay flat and translate cleanly.
+// ---------------------------------------------------------------------------
+
+export const REPORT_TEXT_KEYS = [
+  "case_summary",
+  "primary_conflict",
+  "secondary_issues",
+  "emotional_themes",
+  "key_discrepancies",
+  "follow_up_findings",
+  "treaty_personal_1",
+  "treaty_personal_2",
+  "treaty_personal_3",
+] as const;
+export type ReportTextKey = (typeof REPORT_TEXT_KEYS)[number];
+
+// Models sometimes return a list where a newline-separated string is wanted.
+const multiline = (max: number) =>
+  z.preprocess(
+    (v) => (Array.isArray(v) ? v.map(String).join("\n") : v),
+    z.string().trim().min(1).max(max),
+  );
+
+export const reportTextsSchema = z.object({
+  case_summary: short(700),
+  primary_conflict: short(200),
+  secondary_issues: multiline(300),
+  emotional_themes: multiline(500),
+  key_discrepancies: multiline(700),
+  follow_up_findings: multiline(700),
+  treaty_personal_1: short(220),
+  treaty_personal_2: short(220),
+  treaty_personal_3: short(220),
+});
+export type ReportTexts = z.infer<typeof reportTextsSchema>;
+
+export function reportTranslationSchemaFor(original: ReportTexts) {
+  return makeTranslationSchema(REPORT_TEXT_KEYS, original);
 }
 
 export type { ChargeId };

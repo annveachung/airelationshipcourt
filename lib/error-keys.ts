@@ -7,6 +7,8 @@ export const CASE_ERROR_KEYS = [
   "already_testified",
   "not_allowed",
   "already_answered",
+  "already_signed",
+  "report_not_ready",
   "invalid",
   "unknown",
 ] as const;

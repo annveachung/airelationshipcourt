@@ -105,7 +105,8 @@
     "waitingAnswersBody": "你的回答已送出。等你的伴侶也回答完畢，法庭就會繼續進行。此頁面會自動更新。",
     "panelTitle": "審判團正在評議",
     "panelBody": "所有證據都已齊備。判決將在下一個開發階段推出。",
-    "stillBuilding": "法庭的這個部分仍在建置中。"
+    "stillBuilding": "法庭的這個部分仍在建置中。",
+    "backToCase": "回到案件"
   },
   "testimony": {
     "whatHappened": "發生了什麼事？",
@@ -158,7 +159,9 @@
     "not_allowed": "目前無法為這個案件提交證詞。",
     "already_answered": "你已經回答過這個案件的後續提問了。",
     "invalid": "請檢查你的答案——有些欄位漏填、太短或太長。",
-    "unknown": "出了點問題，請再試一次。"
+    "unknown": "出了點問題，請再試一次。",
+    "already_signed": "你已經簽署過這份條約了。",
+    "report_not_ready": "報告還沒準備好，請稍等一下。"
   },
   "inviteErrors": {
     "invite_invalid": "這個邀請連結看起來不正確。",
@@ -253,7 +256,12 @@
     "severity": "嚴重程度（1-10）",
     "causeNote": "起因補充",
     "needsNote": "期望補充",
-    "pending": "判決已出，但內容尚未備妥。請重新整理頁面。"
+    "pending": "判決已出，但內容尚未備妥。請重新整理頁面。",
+    "decree": "正式判決書 · 案件 #{id}",
+    "responsibility": "責任比例",
+    "continueAdvice": "繼續查看法庭的建議",
+    "panelScores": "{a} {pa}% · {b} {pb}%",
+    "panelTap": "點選成員即可閱讀他們的看法"
   },
   "panelRoles": {
     "jury": "陪審團",
@@ -281,5 +289,91 @@
     "interrupting": "打斷別人說話",
     "tone_of_voice": "那個語氣",
     "forgot_the_thing": "忘了那件事"
+  },
+  "stepper": {
+    "label": "進度",
+    "verdict": "判決",
+    "advice": "建議",
+    "report": "報告",
+    "treaty": "條約"
+  },
+  "advice": {
+    "title": "法庭的建議",
+    "intro": "貼心的話、實在的話，還有幾項罪名。請帶著幽默感閱讀。",
+    "forYou": "給你",
+    "forPartner": "給{name}",
+    "suggestion": "建議",
+    "jointTitle": "給你們兩位",
+    "chargesTitle": "罪名",
+    "chargesIntro": "只是鬧著玩，而且只針對行為。不會留下任何永久紀錄。",
+    "continueReport": "繼續查看案件報告",
+    "preparing": "書記官還在整理報告…"
+  },
+  "report": {
+    "title": "案件報告",
+    "docket": "案件報告 · 案件 #{id}",
+    "preparing": "書記官正在撰寫案件報告…",
+    "prepareFailed": "報告暫時無法準備好，請稍後重新整理頁面。",
+    "pending": "報告還沒準備好，請稍後重新整理頁面。",
+    "print": "列印或另存為 PDF",
+    "caseSummary": "案件摘要",
+    "primaryConflict": "主要衝突",
+    "secondaryIssues": "次要問題",
+    "emotionalThemes": "情緒主題",
+    "keyDiscrepancies": "關鍵出入",
+    "followUpFindings": "後續提問的發現",
+    "panelPerspectives": "審判團的看法",
+    "panelAgreement": "審判團共識",
+    "charges": "罪名",
+    "finalResponsibility": "最終責任比例",
+    "finalVerdict": "最終判決",
+    "courtSummary": "法庭總結",
+    "feedback": "回饋",
+    "agreement": {
+      "unanimous_a": "三位審判團成員一致認為{a}的責任較大。",
+      "unanimous_b": "三位審判團成員一致認為{b}的責任較大。",
+      "split_a": "三位審判團成員中有兩位認為{a}的責任較大。",
+      "split_b": "三位審判團成員中有兩位認為{b}的責任較大。",
+      "level": "審判團的意見不分軒輊。"
+    }
+  },
+  "treaty": {
+    "title": "和平條約",
+    "intro": "要結案，你們兩位都必須簽名。請勾選你們同意的條款——只有第一條是必選的。",
+    "required": "我接受法庭的裁決（連我不喜歡的部分也接受）。",
+    "optionalHeading": "選擇性條款",
+    "personalHeading": "法庭專為你們兩位擬定",
+    "clauses": {
+      "hug": "我們會擁抱至少 20 秒，不准側身抱。",
+      "snacks": "我們會用零食當作求和的貢品。",
+      "old_grudges": "陳年舊帳正式退休。"
+    },
+    "sign": "簽署條約",
+    "signing": "簽署中…",
+    "signedBy": "簽署人：{name}",
+    "youSigned": "你已簽名，正在等待{name}。",
+    "waitingTitle": "正在等待{name}簽名",
+    "waitingBody": "你的簽名已經在條約上了。等你的伴侶也簽名，案件就會結案。此頁面會自動更新。",
+    "adjourn": "不簽條約，直接休庭",
+    "adjournTitle": "不簽條約就結案嗎？",
+    "adjournBody": "案件會為你們兩位結案，之後你們可以提出新的案件。這樣就不會有條約。",
+    "adjournConfirm": "是的，休庭結案"
+  },
+  "closed": {
+    "stamp": "案件已結案",
+    "treatyTitle": "條約已簽署",
+    "signedBy": "由{a}與{b}簽署",
+    "adjournedTitle": "案件已休庭",
+    "adjournedBody": "法庭在未簽條約的情況下休庭。沒有人簽名，也沒有人惹上麻煩。",
+    "peaceMeter": "和平指數",
+    "peaceLevel": "已同意 {agreed} / {possible} 項選擇性條款",
+    "band": {
+      "frosty": "空氣一片冰冷。法庭強烈建議吃點零食。",
+      "thawing": "冰層開始融化了。小小一步也算數。",
+      "warm": "溫暖又合作。法庭抱持審慎樂觀的態度。",
+      "lovebirds": "閃到不行的恩愛鴛鴦。法庭都臉紅了。"
+    },
+    "fileNew": "提出新案件",
+    "viewReport": "查看案件報告"
   }
 }

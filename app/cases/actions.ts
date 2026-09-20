@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { generateCaseTitle } from "@/lib/ai/title";
 import { transition } from "@/lib/cases/state-machine";
+import { normalizeClauses } from "@/lib/cases/treaty";
 import { caseSchema, testimonySchema } from "@/lib/cases/testimony";
 import type { Locale } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
@@ -157,6 +158,96 @@ export async function submitFollowUp(formData: FormData) {
   const row = (status as { a_followed_up: boolean; b_followed_up: boolean }[] | null)?.[0];
   if (row?.a_followed_up && row?.b_followed_up) {
     await transition(caseId, "FOLLOW_UP", "PANEL_JUDGEMENT");
+  }
+
+  revalidatePath(caseUrl);
+  revalidatePath("/");
+  redirect(caseUrl);
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: walking through the verdict, and closing the case
+// ---------------------------------------------------------------------------
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function memberStatus(caseId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
+  const row = (
+    data as
+      | { stage: string; a_signed: boolean; b_signed: boolean; report_ready: boolean }[]
+      | null
+  )?.[0];
+  return { supabase, row };
+}
+
+/** VERDICT -> RECOMMENDATIONS, then RECOMMENDATIONS -> REPORT (once the report is written). */
+export async function continueCase(formData: FormData) {
+  const caseId = String(formData.get("caseId") ?? "");
+  if (!UUID_RE.test(caseId)) redirect("/");
+  const caseUrl = `/cases/${caseId}`;
+
+  const { row } = await memberStatus(caseId);
+  if (!row) redirect("/");
+
+  if (row.stage === "VERDICT") {
+    await transition(caseId, "VERDICT", "RECOMMENDATIONS");
+  } else if (row.stage === "RECOMMENDATIONS") {
+    if (!row.report_ready) redirect(`${caseUrl}?error=report_not_ready`);
+    await transition(caseId, "RECOMMENDATIONS", "REPORT");
+  }
+  // Any other stage (or a partner already advanced it): nothing to do.
+
+  revalidatePath(caseUrl);
+  redirect(caseUrl);
+}
+
+/** Signs the Peace Treaty. The case closes when BOTH partners have signed. */
+export async function signTreaty(formData: FormData) {
+  const caseId = String(formData.get("caseId") ?? "");
+  if (!UUID_RE.test(caseId)) redirect("/");
+  const caseUrl = `/cases/${caseId}`;
+
+  const { supabase } = await memberStatus(caseId);
+  const clauses = normalizeClauses(formData.getAll("clauses"));
+
+  const { error } = await supabase.rpc("sign_treaty", { the_case: caseId, agreed: clauses });
+  if (error) {
+    console.error("sign_treaty failed:", error.message, "case", caseId);
+    const key = error.message.includes("already_signed")
+      ? "already_signed"
+      : error.message.includes("not_allowed")
+        ? "not_allowed"
+        : "invalid";
+    redirect(`${caseUrl}?error=${key}`);
+  }
+
+  // Both signed? Close the case (compare-and-swap: safe if both sign at the same moment).
+  const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
+  const row = (data as { a_signed: boolean; b_signed: boolean }[] | null)?.[0];
+  if (row?.a_signed && row?.b_signed) {
+    await transition(caseId, "REPORT", "CLOSED", { closedReason: "treaty" });
+  }
+
+  revalidatePath(caseUrl);
+  revalidatePath("/");
+  redirect(caseUrl);
+}
+
+/** Closes the case without a treaty, so one stubborn partner can't block the couple forever. */
+export async function adjournCase(formData: FormData) {
+  const caseId = String(formData.get("caseId") ?? "");
+  if (!UUID_RE.test(caseId)) redirect("/");
+  const caseUrl = `/cases/${caseId}`;
+
+  const { row } = await memberStatus(caseId);
+  if (row?.stage === "REPORT") {
+    await transition(caseId, "REPORT", "CLOSED", { closedReason: "adjourned" });
   }
 
   revalidatePath(caseUrl);

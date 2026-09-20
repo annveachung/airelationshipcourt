@@ -1,5 +1,7 @@
 # Phase 6 — Verdict UI, Feedback & Report
 
+> **Updated while building:** the flow is verdict -> advice -> report -> **Peace Treaty**, and the case closes when **both partners sign** (or either partner adjourns without a treaty). The treaty has one required clause, three personalised clauses written by the AI from the case, and three silly fixed ones; the closing screen shows a Peace-o-meter. The report is AI-written (a separate "report writer" call, translated like the verdict) and prepared in the background while partners read the verdict. The Panel Agreement section is computed in code. Everything is bilingual (English + Traditional Chinese). Tables: `report_texts`, `treaty_signatures`, plus `cases.closed_reason` (migration `20260923000001_report_and_treaty.sql`). Printing uses a print stylesheet only — no PDF library, no share-as-image.
+
 ## 1. Goal
 
 Turn the stored verdict into the experience the app is built around: a dramatic, readable final verdict, a walk through the court's findings and feedback, humorous charges, and a complete case report that becomes the permanent record. The case moves through `VERDICT → RECOMMENDATIONS → REPORT → CLOSED`. No new AI work — this phase is presentation and case closure on top of data that already exists.
