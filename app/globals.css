@@ -64,3 +64,22 @@ body {
 html:lang(zh-Hant) body * {
   letter-spacing: normal;
 }
+
+/* Printing / "Save as PDF": just the page content, black on white. */
+@media print {
+  header,
+  nav {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  details > * {
+    display: block !important;
+  }
+}

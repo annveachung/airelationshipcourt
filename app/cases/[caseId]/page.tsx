@@ -2,17 +2,13 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { FollowUpForm, type FollowUpQuestionRow } from "@/components/court/follow-up-form";
 import { TestimonyForm } from "@/components/court/testimony-form";
-import { TestimoniesView, type TestimonyView } from "@/components/court/testimonies-view";
-import { TranslationGate } from "@/components/court/translation-gate";
-import { VerdictSummary } from "@/components/court/verdict-summary";
+import { VerdictFlow } from "@/components/court/verdict-flow";
 import { WaitingScreen } from "@/components/court/waiting-screen";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageWithSidebar } from "@/components/ui/page";
-import { verdictTextsSchema } from "@/lib/ai/schemas";
-import type { PanelRole } from "@/lib/cases/aggregate";
-import type { VerdictCharges } from "@/lib/cases/charges";
 import { CASE_STAGES, type CaseStage } from "@/lib/cases/stages";
+import { loadVerdictBundle } from "@/lib/cases/verdict-data";
 import type { Locale } from "@/lib/i18n";
 import { getMyCouple } from "@/lib/couples";
 import { toAiErrorKey, toCaseErrorKey } from "@/lib/error-keys";
@@ -27,6 +23,9 @@ type StatusRow = {
   a_followed_up: boolean;
   b_followed_up: boolean;
   failed: boolean;
+  a_signed: boolean;
+  b_signed: boolean;
+  report_ready: boolean;
 };
 
 export default async function CasePage({ params, searchParams }: PageProps<"/cases/[caseId]">) {
@@ -47,7 +46,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
   // Row Level Security only returns cases belonging to my couple.
   const { data: theCase } = await supabase
     .from("cases")
-    .select("id, title, context, stage, last_error")
+    .select("id, title, context, stage, last_error, closed_reason")
     .eq("id", caseId)
     .maybeSingle();
   if (!theCase) notFound();
@@ -74,6 +73,9 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
     aFollowedUp: status.a_followed_up,
     bFollowedUp: status.b_followed_up,
     failed: status.failed,
+    aSigned: status.a_signed,
+    bSigned: status.b_signed,
+    reportReady: status.report_ready,
   };
 
   const errorBanner = errorKey && (
@@ -81,6 +83,8 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
       {tErr(errorKey)}
     </p>
   );
+
+  const afterVerdict = CASE_STAGES.indexOf(stage) >= CASE_STAGES.indexOf("VERDICT");
 
   let main;
   if (stage === "TESTIMONY" && !mySubmitted) {
@@ -163,76 +167,9 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
         />
       </Card>
     );
-  } else if (CASE_STAGES.indexOf(stage) >= CASE_STAGES.indexOf("VERDICT")) {
-    // The verdict is out (Phase 6 will replace this plain page with the designed one).
-    const locale = (await getLocale()) as Locale;
-    const tVerdict = await getTranslations("verdict");
-    const [{ data: verdict }, { data: textRows }, { data: panelRows }, { data: testimonyRows }] =
-      await Promise.all([
-        supabase.from("verdicts").select("*").eq("case_id", caseId).maybeSingle(),
-        supabase.from("verdict_texts").select("locale, content").eq("case_id", caseId),
-        supabase
-          .from("panel_assessments")
-          .select("role, responsibility_partner_a, responsibility_partner_b")
-          .eq("case_id", caseId),
-        supabase
-          .from("testimonies")
-          .select(
-            "user_id, what_happened, frequency, causes, cause_note, emotions, severity, partner_did_wrong, needs, needs_note",
-          )
-          .eq("case_id", caseId),
-      ]);
-
-    // Prefer the viewer's language; fall back to English until a translation exists.
-    const parsed = (row: { content: unknown } | undefined) =>
-      row ? verdictTextsSchema.safeParse(row.content) : undefined;
-    const mine = parsed(textRows?.find((r) => r.locale === locale));
-    const english = parsed(textRows?.find((r) => r.locale === "en"));
-    const texts = mine?.success ? mine.data : english?.success ? english.data : null;
-    const needsTranslation = locale !== "en" && !mine?.success && english?.success === true;
-
-    if (!verdict || !texts) {
-      main = (
-        <Card>
-          <p className="text-body-md text-walnut">{tVerdict("pending")}</p>
-        </Card>
-      );
-    } else {
-      const nameA = iAmA ? couple.me.name : couple.partner.name;
-      const nameB = iAmA ? couple.partner.name : couple.me.name;
-      const idA = iAmA ? couple.me.userId : couple.partner.userId;
-      const idB = iAmA ? couple.partner.userId : couple.me.userId;
-      const panel = Object.fromEntries(
-        (panelRows ?? []).map((r) => [
-          r.role,
-          { a: Number(r.responsibility_partner_a), b: Number(r.responsibility_partner_b) },
-        ]),
-      ) as Partial<Record<PanelRole, { a: number; b: number }>>;
-      const testimonies: TestimonyView[] = [
-        { userId: idA, name: nameA },
-        { userId: idB, name: nameB },
-      ].flatMap(({ userId, name }) => {
-        const row = testimonyRows?.find((x) => x.user_id === userId);
-        return row ? [{ ...row, name } as TestimonyView] : [];
-      });
-
-      main = (
-        <div className="flex flex-col gap-6">
-          {needsTranslation && <TranslationGate caseId={caseId} locale={locale} />}
-          <VerdictSummary
-            names={{ a: nameA, b: nameB }}
-            finalA={Number(verdict.final_responsibility_a)}
-            finalB={Number(verdict.final_responsibility_b)}
-            moreResponsible={verdict.more_responsible}
-            decidedBy={verdict.decided_by}
-            texts={texts}
-            charges={verdict.charges as VerdictCharges}
-            panel={panel}
-          />
-          {testimonies.length > 0 && <TestimoniesView testimonies={testimonies} />}
-        </div>
-      );
-    }
+  } else if (afterVerdict) {
+    // Handled below: verdict, advice, report and closing use their own full-width layout.
+    main = null;
   } else {
     main = (
       <Card>
@@ -243,6 +180,43 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
           message={t("stillBuilding")}
         />
       </Card>
+    );
+  }
+
+  if (afterVerdict) {
+    const locale = (await getLocale()) as Locale;
+    const bundle = await loadVerdictBundle(supabase, caseId, locale);
+    const names = {
+      a: iAmA ? couple.me.name : couple.partner.name,
+      b: iAmA ? couple.partner.name : couple.me.name,
+    };
+    const userIds = {
+      a: iAmA ? couple.me.userId : couple.partner.userId,
+      b: iAmA ? couple.partner.userId : couple.me.userId,
+    };
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
+          <Badge>{t("badge", { id: caseId.slice(0, 4).toUpperCase(), stage: tStages(stage) })}</Badge>
+          <h1 className="break-words text-headline-lg text-espresso md:text-display-verdict">
+            {theCase.title}
+          </h1>
+        </div>
+        <VerdictFlow
+          caseId={caseId}
+          stage={stage}
+          closedReason={theCase.closed_reason as "treaty" | "adjourned" | null}
+          locale={locale}
+          names={names}
+          userIds={userIds}
+          iAmA={iAmA}
+          mySigned={iAmA ? status.a_signed : status.b_signed}
+          partnerName={partner}
+          bundle={bundle}
+          status={initial}
+          errorText={errorKey ? tErr(errorKey) : null}
+        />
+      </div>
     );
   }
 

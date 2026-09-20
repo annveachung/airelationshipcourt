@@ -12,6 +12,8 @@ import {
   analysisSchema,
   panelAssessmentSchema,
   questionsSchema,
+  reportTextsSchema,
+  reportTranslationSchemaFor,
   synthesisSchema,
   translationSchemaFor,
   verdictTextsSchema,
@@ -19,6 +21,8 @@ import {
   type PanelAssessment,
   type VerdictTexts,
 } from "@/lib/ai/schemas";
+import { reportMessages } from "@/lib/ai/prompts/report";
+import type { ZodType } from "zod";
 import { aggregate, PANEL_ROLES, type PanelRole } from "./aggregate";
 import { CHARGE_IDS } from "./charges";
 import { isLocale, type Locale } from "@/lib/i18n";
@@ -229,24 +233,41 @@ function assembleEnglishTexts(s: ReturnType<typeof synthesisSchema.parse>, panel
   };
 }
 
-/** Translates the English verdict texts into `locale` (idempotent; used here and by the lazy route). */
-export async function ensureTranslation(caseId: string, locale: Locale): Promise<"ok" | "in_progress" | "failed"> {
+export type TranslationKind = "verdict" | "report";
+
+/**
+ * Translates the English verdict texts (or the report texts) into `locale`.
+ * Idempotent; used by the pipeline and by the lazy translate/report routes.
+ */
+export async function ensureTranslation(
+  caseId: string,
+  locale: Locale,
+  kind: TranslationKind = "verdict",
+): Promise<"ok" | "in_progress" | "failed"> {
   if (locale === "en") return "ok";
   const db = createServiceClient();
+  const table = kind === "report" ? "report_texts" : "verdict_texts";
 
-  const { data: have } = await db.from("verdict_texts").select("locale").eq("case_id", caseId).eq("locale", locale).maybeSingle();
+  const { data: have } = await db.from(table).select("locale").eq("case_id", caseId).eq("locale", locale).maybeSingle();
   if (have) return "ok";
 
-  const { data: en } = await db.from("verdict_texts").select("content").eq("case_id", caseId).eq("locale", "en").maybeSingle();
+  const { data: en } = await db.from(table).select("content").eq("case_id", caseId).eq("locale", "en").maybeSingle();
   if (!en) return "failed";
-  const original = verdictTextsSchema.parse(en.content);
 
-  const { system, user } = translateMessages(original, locale);
+  const original = kind === "report" ? reportTextsSchema.parse(en.content) : verdictTextsSchema.parse(en.content);
+  const schema = (
+    kind === "report"
+      ? reportTranslationSchemaFor(original as ReturnType<typeof reportTextsSchema.parse>)
+      : translationSchemaFor(original as VerdictTexts)
+  ) as unknown as ZodType<Record<string, string>>;
+
+  const { system, user } = translateMessages(original as Record<string, string>, locale);
   const result = await runStructured({
     caseId,
     stage: "translation",
-    subKey: locale,
-    schema: translationSchemaFor(original),
+    // Verdict translations keep their original claim key; report translations get their own.
+    subKey: kind === "report" ? `report:${locale}` : locale,
+    schema,
     system,
     user,
     temperature: 0.3,
@@ -255,9 +276,57 @@ export async function ensureTranslation(caseId: string, locale: Locale): Promise
   if (result.kind === "in_progress") return "in_progress";
   if (result.kind === "failed") return "failed";
 
-  const { error } = await db.from("verdict_texts").upsert({ case_id: caseId, locale, content: result.data });
+  const { error } = await db.from(table).upsert({ case_id: caseId, locale, content: result.data });
   if (error) {
-    console.error("save translation failed:", caseId, error.code);
+    console.error("save translation failed:", caseId, kind, error.code);
+    return "failed";
+  }
+  return "ok";
+}
+
+/** Writes the English case report + personalised treaty clauses (idempotent). */
+export async function ensureReport(caseId: string): Promise<"ok" | "in_progress" | "failed"> {
+  const db = createServiceClient();
+
+  const { data: have } = await db.from("report_texts").select("locale").eq("case_id", caseId).eq("locale", "en").maybeSingle();
+  if (have) return "ok";
+
+  const loaded = await loadCase(caseId);
+  const [{ data: analysisRow }, { data: verdict }, { data: panelRows }] = await Promise.all([
+    db.from("case_analyses").select("*").eq("case_id", caseId).maybeSingle(),
+    db.from("verdicts").select("final_responsibility_a, final_responsibility_b, more_responsible").eq("case_id", caseId).maybeSingle(),
+    db.from("panel_assessments").select("role, content").eq("case_id", caseId),
+  ]);
+  if (!loaded || !analysisRow || !verdict || !panelRows || panelRows.length < PANEL_ROLES.length) return "failed";
+
+  const followUps = await loadFollowUps(caseId, loaded.userA, loaded.userB);
+  const panelSummaries = Object.fromEntries(
+    panelRows.map((r) => [r.role, String((r.content as { reasoning_summary?: string }).reasoning_summary ?? "")]),
+  ) as Record<PanelRole, string>;
+
+  const { system, user } = reportMessages({
+    analysis: analysisSchema.parse(analysisRow),
+    finalA: Number(verdict.final_responsibility_a),
+    finalB: Number(verdict.final_responsibility_b),
+    moreResponsible: verdict.more_responsible,
+    panelSummaries,
+    followUps,
+  });
+  const result = await runStructured({
+    caseId,
+    stage: "report",
+    schema: reportTextsSchema,
+    system,
+    user,
+    temperature: 0.7,
+    maxTokens: 2500,
+  });
+  if (result.kind === "in_progress") return "in_progress";
+  if (result.kind === "failed") return "failed";
+
+  const { error } = await db.from("report_texts").upsert({ case_id: caseId, locale: "en", content: result.data });
+  if (error) {
+    console.error("save report failed:", caseId, error.code);
     return "failed";
   }
   return "ok";

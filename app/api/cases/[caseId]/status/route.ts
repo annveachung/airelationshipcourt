@@ -30,6 +30,9 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/cases/[case
           a_followed_up: boolean;
           b_followed_up: boolean;
           failed: boolean;
+          a_signed: boolean;
+          b_signed: boolean;
+          report_ready: boolean;
         }[]
       | null
   )?.[0];
@@ -45,6 +48,9 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/cases/[case
       aFollowedUp: row.a_followed_up,
       bFollowedUp: row.b_followed_up,
       failed: row.failed,
+      aSigned: row.a_signed,
+      bSigned: row.b_signed,
+      reportReady: row.report_ready,
     },
     { headers: { "Cache-Control": "no-store" } },
   );

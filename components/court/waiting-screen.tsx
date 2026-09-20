@@ -14,6 +14,9 @@ type Status = {
   aFollowedUp: boolean;
   bFollowedUp: boolean;
   failed: boolean;
+  aSigned: boolean;
+  bSigned: boolean;
+  reportReady: boolean;
 };
 
 // Stages where the server does AI work that this screen should keep nudging along.

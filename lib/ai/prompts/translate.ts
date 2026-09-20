@@ -1,9 +1,9 @@
 import { AI_LANGUAGE_NAMES, type Locale } from "@/lib/i18n";
-import type { VerdictTexts } from "../schemas";
 
-export function translateMessages(texts: VerdictTexts, locale: Locale) {
+// Works for any flat key -> text record (the verdict texts or the report texts).
+export function translateMessages(texts: Record<string, string>, locale: Locale) {
   const language = AI_LANGUAGE_NAMES[locale];
-  const system = `You translate the text of a lighthearted "relationship court" verdict into ${language}.
+  const system = `You translate the text of a lighthearted "relationship court" verdict into ${language}. (The same rules apply to the written case report and treaty clauses.)
 
 Rules:
 - Return a JSON object with EXACTLY the same keys as the input; translate every value.
