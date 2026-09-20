@@ -2,15 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FilePlus, Gavel, ScrollText } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { isActive, navLinks } from "./nav-links";
 
-const tabs = [
-  { href: "/", label: "Docket", icon: Gavel },
-  { href: "/cases/new", label: "File Case", icon: FilePlus },
-  { href: "/history", label: "Verdicts", icon: ScrollText },
-];
-
+// Phone navigation (below md). Desktop uses the top nav instead.
 export function TabBar() {
   const pathname = usePathname();
   // Signed-out screens have nowhere to navigate to.
@@ -18,18 +13,18 @@ export function TabBar() {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[430px] border-t border-hairline bg-canvas/85 backdrop-blur-[20px] backdrop-saturate-150 pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-hairline bg-canvas/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-[20px] backdrop-saturate-150 md:hidden"
     >
-      <ul className="flex">
-        {tabs.map(({ href, label, icon: Icon }) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+      <ul className="mx-auto flex max-w-[430px]">
+        {navLinks.map(({ href, label, icon: Icon }) => {
+          const active = isActive(pathname, href);
           return (
             <li key={href} className="flex-1">
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-label-docket uppercase",
+                  "flex min-h-14 flex-col items-center justify-center gap-1 text-label-docket uppercase",
                   active ? "text-espresso" : "text-walnut",
                 )}
               >

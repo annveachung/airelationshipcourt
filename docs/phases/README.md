@@ -69,7 +69,7 @@ docs/phases/          these plan files
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | 2 | yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 2 | yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | 3 | **never** |
+| `SUPABASE_SECRET_KEY` | 3 | **never** |
 | `DASHSCOPE_API_KEY` | 4 | **never** |
 | `DASHSCOPE_BASE_URL` | 4 | no |
 | `DASHSCOPE_MODEL` | 4 | no |
@@ -95,6 +95,16 @@ The full table design was worked out once and is split across phases so you only
 | `panel_assessments`, `verdicts` | 5 |
 | `notifications` | 7 |
 | *(no new tables — SQL aggregation over the above)* | 8 |
+
+## Applying database migrations
+
+Migrations are SQL files in `supabase/migrations/`, named with a timestamp (for example `20260919000002_cases_and_testimony.sql`). Phase docs may still say "paste into the SQL Editor" and use `0003_…`-style names — use a timestamped name instead and apply with the Supabase CLI:
+
+```
+npx supabase db push
+```
+
+One-time setup: `npx supabase login`, then `npx supabase link --project-ref <your-project-ref>` (it asks for your database password). `db push` applies only migrations that haven't run yet.
 
 ## Things deliberately left out of the whole project (for now)
 
