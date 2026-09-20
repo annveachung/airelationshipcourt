@@ -95,6 +95,7 @@ export const CASE_ERRORS: Record<string, string> = {
   no_active_couple: "You need a couple with both partners before filing a case.",
   already_testified: "You've already given your testimony for this case.",
   not_allowed: "You can't submit testimony for this case right now.",
+  already_answered: "You've already answered the follow-up questions for this case.",
   invalid: "Please check your answers — some fields are missing, too short or too long.",
 };
 

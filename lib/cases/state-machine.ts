@@ -47,3 +47,15 @@ export async function transition(caseId: string, from: CaseStage, to: CaseStage)
   }
   return (data?.length ?? 0) > 0;
 }
+
+/**
+ * Records (or clears) the friendly error shown to partners when an AI step fails.
+ * Kept here so every write to `cases` lives in this one file. Never changes the stage.
+ */
+export async function setCaseError(caseId: string, message: string | null): Promise<void> {
+  const { error } = await createServiceClient()
+    .from("cases")
+    .update({ last_error: message, updated_at: new Date().toISOString() })
+    .eq("id", caseId);
+  if (error) console.error("setCaseError failed:", caseId, error.message);
+}
