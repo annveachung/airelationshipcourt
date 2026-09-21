@@ -1,5 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
+import { CaseLive } from "@/components/court/case-live";
+import { CourtStatusFull, CourtStatusStrip } from "@/components/court/court-status-panel";
 import { FollowUpForm, type FollowUpQuestionRow } from "@/components/court/follow-up-form";
 import { TestimonyForm } from "@/components/court/testimony-form";
 import { VerdictFlow } from "@/components/court/verdict-flow";
@@ -8,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageWithSidebar } from "@/components/ui/page";
 import { CASE_STAGES, type CaseStage } from "@/lib/cases/stages";
+import { toCourtStatus, type CourtStatusRow } from "@/lib/cases/court-status";
 import { loadVerdictBundle } from "@/lib/cases/verdict-data";
 import type { Locale } from "@/lib/i18n";
 import { getMyCouple } from "@/lib/couples";
@@ -16,23 +19,10 @@ import { createClient } from "@/lib/supabase/server";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-type StatusRow = {
-  stage: CaseStage;
-  a_submitted: boolean;
-  b_submitted: boolean;
-  a_followed_up: boolean;
-  b_followed_up: boolean;
-  failed: boolean;
-  a_signed: boolean;
-  b_signed: boolean;
-  report_ready: boolean;
-};
-
 export default async function CasePage({ params, searchParams }: PageProps<"/cases/[caseId]">) {
   const t = await getTranslations("casePage");
   const tStages = await getTranslations("stages");
   const tErr = await getTranslations("caseErrors");
-  const tRoles = await getTranslations("roles");
 
   const { caseId } = await params;
   if (!UUID.test(caseId)) notFound();
@@ -54,29 +44,22 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
   const couple = await getMyCouple(user.id);
   if (couple.kind !== "active") notFound();
 
-  const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
-  const status = (data as StatusRow[] | null)?.[0];
-  if (!status) notFound();
+  const { data } = await supabase.rpc("court_status", { the_case: caseId });
+  const row = (data as CourtStatusRow[] | null)?.[0];
+  if (!row) notFound();
+  const status = toCourtStatus(row);
 
   const stage = theCase.stage as CaseStage;
   const iAmA = couple.me.role === "partner_a";
-  const mySubmitted = iAmA ? status.a_submitted : status.b_submitted;
-  const partnerSubmitted = iAmA ? status.b_submitted : status.a_submitted;
-  const myFollowedUp = iAmA ? status.a_followed_up : status.b_followed_up;
-  const partnerFollowedUp = iAmA ? status.b_followed_up : status.a_followed_up;
+  const mySubmitted = iAmA ? status.aSubmitted : status.bSubmitted;
+  const myFollowedUp = iAmA ? status.aFollowedUp : status.bFollowedUp;
   const errorKey = toCaseErrorKey((await searchParams).error);
-  const partner = couple.partner.name;
-  const initial = {
-    stage,
-    aSubmitted: status.a_submitted,
-    bSubmitted: status.b_submitted,
-    aFollowedUp: status.a_followed_up,
-    bFollowedUp: status.b_followed_up,
-    failed: status.failed,
-    aSigned: status.a_signed,
-    bSigned: status.b_signed,
-    reportReady: status.report_ready,
+  const names = {
+    a: iAmA ? couple.me.name : couple.partner.name,
+    b: iAmA ? couple.partner.name : couple.me.name,
   };
+
+  const partner = couple.partner.name;
 
   const errorBanner = errorKey && (
     <p role="alert" className="text-body-sm text-error">
@@ -102,8 +85,6 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
     main = (
       <Card>
         <WaitingScreen
-          caseId={caseId}
-          initial={initial}
           title={t("waitingForPartner", { partner })}
           message={t("waitingTestimony")}
         />
@@ -113,8 +94,6 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
     main = (
       <Card>
         <WaitingScreen
-          caseId={caseId}
-          initial={initial}
           drive
           errorKey={toAiErrorKey(theCase.last_error)}
           title={t("analysingTitle")}
@@ -147,8 +126,6 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
     main = (
       <Card>
         <WaitingScreen
-          caseId={caseId}
-          initial={initial}
           title={t("waitingAnswers", { partner })}
           message={t("waitingAnswersBody")}
         />
@@ -158,8 +135,6 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
     main = (
       <Card>
         <WaitingScreen
-          caseId={caseId}
-          initial={initial}
           drive
           errorKey={toAiErrorKey(theCase.last_error)}
           title={t("panelTitle")}
@@ -174,8 +149,6 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
     main = (
       <Card>
         <WaitingScreen
-          caseId={caseId}
-          initial={initial}
           title={tStages(stage)}
           message={t("stillBuilding")}
         />
@@ -186,21 +159,21 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
   if (afterVerdict) {
     const locale = (await getLocale()) as Locale;
     const bundle = await loadVerdictBundle(supabase, caseId, locale);
-    const names = {
-      a: iAmA ? couple.me.name : couple.partner.name,
-      b: iAmA ? couple.partner.name : couple.me.name,
-    };
     const userIds = {
       a: iAmA ? couple.me.userId : couple.partner.userId,
       b: iAmA ? couple.partner.userId : couple.me.userId,
     };
     return (
+      <CaseLive caseId={caseId} initial={status}>
       <div className="flex flex-col gap-6">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
           <Badge>{t("badge", { id: caseId.slice(0, 4).toUpperCase(), stage: tStages(stage) })}</Badge>
           <h1 className="break-words text-headline-lg text-espresso md:text-display-verdict">
             {theCase.title}
           </h1>
+        </div>
+        <div className="mx-auto w-full max-w-3xl">
+          <CourtStatusStrip caseId={caseId} names={names} context={theCase.context} />
         </div>
         <VerdictFlow
           caseId={caseId}
@@ -210,55 +183,41 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
           names={names}
           userIds={userIds}
           iAmA={iAmA}
-          mySigned={iAmA ? status.a_signed : status.b_signed}
+          mySigned={iAmA ? status.aSigned : status.bSigned}
           partnerName={partner}
           bundle={bundle}
-          status={initial}
           errorText={errorKey ? tErr(errorKey) : null}
         />
       </div>
+      </CaseLive>
     );
   }
 
-  const statusLine = (name: string, done: boolean, doneText: string) => (
-    <li className="flex items-center justify-between gap-3 text-body-sm">
-      <span className="text-ink">{name}</span>
-      <span className={done ? "text-espresso" : "text-walnut"}>{done ? doneText : t("notYet")}</span>
-    </li>
-  );
-  const me = `${couple.me.name} ${tRoles("you")}`;
+  const panelProps = { caseId, names, context: theCase.context };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <Badge>{t("badge", { id: caseId.slice(0, 4).toUpperCase(), stage: tStages(stage) })}</Badge>
-        <h1 className="break-words text-headline-lg text-espresso md:text-display-verdict">
-          {theCase.title}
-        </h1>
+    <CaseLive caseId={caseId} initial={status}>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <Badge>{t("badge", { id: caseId.slice(0, 4).toUpperCase(), stage: tStages(stage) })}</Badge>
+          <h1 className="break-words text-headline-lg text-espresso md:text-display-verdict">
+            {theCase.title}
+          </h1>
+        </div>
+        {/* Phones: a collapsible status strip above the case. Desktop: the full panel beside it. */}
+        <div className="md:hidden">
+          <CourtStatusStrip {...panelProps} />
+        </div>
+        <PageWithSidebar
+          sidebar={
+            <div className="hidden md:block">
+              <CourtStatusFull {...panelProps} />
+            </div>
+          }
+        >
+          {main}
+        </PageWithSidebar>
       </div>
-      <PageWithSidebar
-        sidebar={
-          <Card className="flex flex-col gap-3">
-            <h2 className="text-label-docket uppercase text-walnut">{t("details")}</h2>
-            {theCase.context && (
-              <p className="break-words text-body-md text-ink">{theCase.context}</p>
-            )}
-            <ul className="flex flex-col gap-2 border-t border-hairline pt-3">
-              {statusLine(me, mySubmitted, t("testified"))}
-              {statusLine(partner, partnerSubmitted, t("testified"))}
-            </ul>
-            {(stage === "FOLLOW_UP" || stage === "PANEL_JUDGEMENT") && (
-              <ul className="flex flex-col gap-2 border-t border-hairline pt-3">
-                <li className="text-label-docket uppercase text-walnut">{t("followUpHeading")}</li>
-                {statusLine(me, myFollowedUp, t("answered"))}
-                {statusLine(partner, partnerFollowedUp, t("answered"))}
-              </ul>
-            )}
-          </Card>
-        }
-      >
-        {main}
-      </PageWithSidebar>
-    </div>
+    </CaseLive>
   );
 }

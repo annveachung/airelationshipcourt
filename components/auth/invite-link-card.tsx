@@ -11,7 +11,14 @@ export function InviteLinkCard({ link }: { link: string }) {
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(link);
+      // The modern clipboard only exists on https (or localhost).
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const box = document.querySelector<HTMLInputElement>('input[aria-label="' + t("linkLabel") + '"]');
+        box?.select();
+        if (!document.execCommand("copy")) return;
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {

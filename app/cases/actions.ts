@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { generateCaseTitle } from "@/lib/ai/title";
 import { transition } from "@/lib/cases/state-machine";
 import { normalizeClauses } from "@/lib/cases/treaty";
+import { notifyBoth, notifyPartner } from "@/lib/notifications";
 import { caseSchema, testimonySchema } from "@/lib/cases/testimony";
 import type { Locale } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
@@ -37,6 +38,11 @@ export async function createCase(formData: FormData) {
         : "unknown";
     redirect(`/cases/new?error=${key}`);
   }
+
+  const {
+    data: { user: filer },
+  } = await supabase.auth.getUser();
+  if (filer) await notifyPartner(filer.id, caseId, "case_filed");
 
   revalidatePath("/");
   redirect(`/cases/${caseId}`);
@@ -88,6 +94,8 @@ export async function submitTestimony(formData: FormData) {
     console.error("submit testimony failed:", error.code, "case", t.caseId, "user", user.id);
     redirect(`${caseUrl}?error=${error.code === "23505" ? "already_testified" : "not_allowed"}`);
   }
+
+  await notifyPartner(user.id, t.caseId, "partner_testified");
 
   // If both partners have now testified, move the case on. The compare-and-swap
   // inside transition() makes this safe if both submit at the same moment.
@@ -153,6 +161,8 @@ export async function submitFollowUp(formData: FormData) {
     redirect(`${caseUrl}?error=${key}`);
   }
 
+  await notifyPartner(user.id, caseId, "partner_followed_up");
+
   // If both partners have now answered, hand the case to the panel (compare-and-swap is race-safe).
   const { data: status } = await supabase.rpc("case_submission_status", { the_case: caseId });
   const row = (status as { a_followed_up: boolean; b_followed_up: boolean }[] | null)?.[0];
@@ -183,7 +193,7 @@ async function memberStatus(caseId: string) {
       | { stage: string; a_signed: boolean; b_signed: boolean; report_ready: boolean }[]
       | null
   )?.[0];
-  return { supabase, row };
+  return { supabase, row, user };
 }
 
 /** VERDICT -> RECOMMENDATIONS, then RECOMMENDATIONS -> REPORT (once the report is written). */
@@ -213,7 +223,7 @@ export async function signTreaty(formData: FormData) {
   if (!UUID_RE.test(caseId)) redirect("/");
   const caseUrl = `/cases/${caseId}`;
 
-  const { supabase } = await memberStatus(caseId);
+  const { supabase, user } = await memberStatus(caseId);
   const clauses = normalizeClauses(formData.getAll("clauses"));
 
   const { error } = await supabase.rpc("sign_treaty", { the_case: caseId, agreed: clauses });
@@ -227,11 +237,15 @@ export async function signTreaty(formData: FormData) {
     redirect(`${caseUrl}?error=${key}`);
   }
 
+  await notifyPartner(user.id, caseId, "partner_signed");
+
   // Both signed? Close the case (compare-and-swap: safe if both sign at the same moment).
   const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
   const row = (data as { a_signed: boolean; b_signed: boolean }[] | null)?.[0];
   if (row?.a_signed && row?.b_signed) {
-    await transition(caseId, "REPORT", "CLOSED", { closedReason: "treaty" });
+    if (await transition(caseId, "REPORT", "CLOSED", { closedReason: "treaty" })) {
+      await notifyBoth(caseId, "case_closed");
+    }
   }
 
   revalidatePath(caseUrl);
@@ -245,9 +259,11 @@ export async function adjournCase(formData: FormData) {
   if (!UUID_RE.test(caseId)) redirect("/");
   const caseUrl = `/cases/${caseId}`;
 
-  const { row } = await memberStatus(caseId);
+  const { row, user } = await memberStatus(caseId);
   if (row?.stage === "REPORT") {
-    await transition(caseId, "REPORT", "CLOSED", { closedReason: "adjourned" });
+    if (await transition(caseId, "REPORT", "CLOSED", { closedReason: "adjourned" })) {
+      await notifyPartner(user.id, caseId, "case_adjourned");
+    }
   }
 
   revalidatePath(caseUrl);

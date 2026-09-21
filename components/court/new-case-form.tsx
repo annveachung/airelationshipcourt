@@ -5,9 +5,11 @@ import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { createCase } from "@/app/cases/actions";
 import { Button } from "@/components/ui/button";
+import { SpeechButton } from "@/components/ui/speech-button";
 import { fieldClasses } from "@/components/ui/input";
 import { LIMITS } from "@/lib/cases/testimony";
 import { cn } from "@/lib/cn";
+import { appendSpoken } from "@/lib/voice";
 
 function Submit() {
   const t = useTranslations("newCase");
@@ -21,13 +23,16 @@ function Submit() {
 
 export function NewCaseForm() {
   const t = useTranslations("newCase");
-  const [length, setLength] = useState(0);
+  const [value, setValue] = useState("");
   return (
     <form action={createCase} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="context" className="text-label-docket uppercase text-walnut">
-          {t("fieldLabel")}
-        </label>
+        <div className="flex items-start justify-between gap-3">
+          <label htmlFor="context" className="text-label-docket uppercase text-walnut">
+            {t("fieldLabel")}
+          </label>
+          <SpeechButton onText={(text) => setValue((v) => appendSpoken(v, text, LIMITS.context))} />
+        </div>
         <p className="text-body-sm text-walnut">{t("fieldHint")}</p>
         <textarea
           id="context"
@@ -37,11 +42,12 @@ export function NewCaseForm() {
           minLength={10}
           maxLength={LIMITS.context}
           placeholder={t("placeholder")}
-          onChange={(e) => setLength(e.target.value.length)}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
           className={cn(fieldClasses, "min-h-28 resize-y")}
         />
         <span className="self-end text-body-sm text-walnut">
-          {length}/{LIMITS.context}
+          {value.length}/{LIMITS.context}
         </span>
       </div>
       <Submit />

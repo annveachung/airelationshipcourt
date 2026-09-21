@@ -23,6 +23,7 @@ import {
 } from "@/lib/ai/schemas";
 import { reportMessages } from "@/lib/ai/prompts/report";
 import type { ZodType } from "zod";
+import { notifyBoth } from "@/lib/notifications";
 import { aggregate, PANEL_ROLES, type PanelRole } from "./aggregate";
 import { CHARGE_IDS } from "./charges";
 import { isLocale, type Locale } from "@/lib/i18n";
@@ -175,7 +176,9 @@ export async function runAnalysisStep(caseId: string): Promise<StepResult> {
   }
 
   await setCaseError(caseId, null);
-  await transition(caseId, "ANALYSIS", "FOLLOW_UP");
+  if (await transition(caseId, "ANALYSIS", "FOLLOW_UP")) {
+    await notifyBoth(caseId, "analysis_ready");
+  }
   return "advanced";
 }
 
@@ -482,6 +485,8 @@ export async function runPanelStep(caseId: string): Promise<StepResult> {
   }
 
   await setCaseError(caseId, null);
-  await transition(caseId, "PANEL_JUDGEMENT", "VERDICT");
+  if (await transition(caseId, "PANEL_JUDGEMENT", "VERDICT")) {
+    await notifyBoth(caseId, "verdict_ready");
+  }
   return "advanced";
 }

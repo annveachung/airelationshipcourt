@@ -357,7 +357,9 @@
     "adjourn": "Adjourn without a treaty",
     "adjournTitle": "Close the case without a treaty?",
     "adjournBody": "The case closes for both of you and you can file a new one. There will be no treaty.",
-    "adjournConfirm": "Yes, adjourn the case"
+    "adjournConfirm": "Yes, adjourn the case",
+    "signatures": "Signatures",
+    "awaiting": "Awaiting {name}'s signature"
   },
   "closed": {
     "stamp": "Case closed",
@@ -374,6 +376,98 @@
       "lovebirds": "Peak lovebirds. The court is blushing."
     },
     "fileNew": "File a new case",
-    "viewReport": "View the case report"
+    "viewReport": "View the case report",
+    "signatures": "Signatures"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "open": "Notifications",
+    "unread": "{count} unread",
+    "empty": "Nothing yet. The court will let you know.",
+    "playfulLabel": "Playful wording",
+    "partnerFallback": "Your partner",
+    "justNow": "just now",
+    "playful": {
+      "partner_joined": "Your partner has entered the courtroom. Court is now in session.",
+      "case_filed": "{name} has filed a case. Sharpen your memory.",
+      "partner_testified": "The court has received {name}'s side of the story.",
+      "analysis_ready": "The court has finished reading the evidence. Your follow-up questions are ready.",
+      "partner_followed_up": "{name} has answered the court's questions. The ball is in your court.",
+      "verdict_ready": "The verdict is ready. Please prepare your ego.",
+      "partner_signed": "{name} has signed the treaty. Your move.",
+      "case_closed": "Case closed. Go get dinner.",
+      "case_adjourned": "{name} adjourned the case. The court is calling it a day."
+    },
+    "plain": {
+      "partner_joined": "{name} joined your couple.",
+      "case_filed": "{name} filed a new case.",
+      "partner_testified": "{name} submitted their testimony.",
+      "analysis_ready": "The case analysis is done. Your follow-up questions are ready.",
+      "partner_followed_up": "{name} answered the follow-up questions.",
+      "verdict_ready": "The verdict is ready.",
+      "partner_signed": "{name} signed the treaty.",
+      "case_closed": "The case is closed.",
+      "case_adjourned": "{name} adjourned the case."
+    }
+  },
+  "courtStatus": {
+    "title": "Court status",
+    "progress": "Trial progress",
+    "stage": "Current stage",
+    "checklist": "Case status",
+    "testified": "{name} testified",
+    "analysis": "Case analysis",
+    "followUp": "Follow-up answers",
+    "panel": "Panel judgement",
+    "verdict": "Final verdict",
+    "treaty": "Treaty signed",
+    "profile": "Case profile",
+    "profileLocked": "Revealed once the court has analysed the case.",
+    "primary": "Primary issue",
+    "secondary": "Secondary issue",
+    "conflictType": "Conflict type",
+    "intensity": "Conflict intensity",
+    "intensityLocked": "Shown once both testimonies are in.",
+    "panelHeading": "AI panel",
+    "news": "Latest news",
+    "noNews": "Nothing yet.",
+    "show": "Show court status",
+    "bands": {
+      "low": "Low",
+      "moderate": "Moderate",
+      "high": "High",
+      "severe": "Severe"
+    },
+    "panelStates": {
+      "waiting": "Waiting",
+      "working": "In progress",
+      "ready": "Ready"
+    }
+  },
+  "issues": {
+    "Communication": "Communication",
+    "Expectations": "Expectations",
+    "Assumptions": "Assumptions",
+    "Trust": "Trust",
+    "Stress": "Stress",
+    "Time and priorities": "Time and priorities",
+    "Chores or money": "Chores or money",
+    "Family or friends": "Family or friends",
+    "Other": "Other"
+  },
+  "conflictTypes": {
+    "Misunderstanding": "Misunderstanding",
+    "Recurring pattern": "Recurring pattern",
+    "Clash of priorities": "Clash of priorities",
+    "Broken promise": "Broken promise",
+    "Different styles": "Different styles",
+    "Other": "Other"
+  },
+  "voice": {
+    "speak": "Speak",
+    "stop": "Stop",
+    "listening": "Listening…",
+    "blocked": "Microphone access is blocked. Allow it in your browser settings.",
+    "failed": "Voice input isn't working right now. You can type instead."
   }
 }

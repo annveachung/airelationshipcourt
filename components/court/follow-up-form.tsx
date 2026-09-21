@@ -5,9 +5,11 @@ import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { submitFollowUp } from "@/app/cases/actions";
 import { Button } from "@/components/ui/button";
+import { SpeechButton } from "@/components/ui/speech-button";
 import { fieldClasses } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
 import { optionLabel } from "@/lib/i18n-labels";
+import { appendSpoken } from "@/lib/voice";
 
 export type FollowUpQuestionRow = {
   id: string;
@@ -136,22 +138,29 @@ function ShortAnswer({
   label: string;
   onAnswered: (has: boolean) => void;
 }) {
-  const [length, setLength] = useState(0);
+  const [value, setValue] = useState("");
+
+  function change(next: string) {
+    setValue(next);
+    onAnswered(next.trim().length > 0);
+  }
+
   return (
     <div className="flex flex-col gap-1.5">
+      <div className="flex justify-end">
+        <SpeechButton onText={(text) => change(appendSpoken(value, text, 500))} />
+      </div>
       <textarea
         name={name}
         rows={3}
         maxLength={500}
         required
         aria-label={label}
-        onChange={(e) => {
-          setLength(e.target.value.length);
-          onAnswered(e.target.value.trim().length > 0);
-        }}
+        value={value}
+        onChange={(e) => change(e.target.value)}
         className={cn(fieldClasses, "min-h-24 resize-y")}
       />
-      <span className="self-end text-body-sm text-walnut">{length}/500</span>
+      <span className="self-end text-body-sm text-walnut">{value.length}/500</span>
     </div>
   );
 }

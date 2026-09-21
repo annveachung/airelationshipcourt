@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { adjournCase, signTreaty } from "@/app/cases/actions";
+import { SignatureBlock } from "@/components/court/signature-block";
 import { SignButton } from "@/components/court/sign-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,15 +11,16 @@ import { FIXED_CLAUSES } from "@/lib/cases/treaty";
 type Props = {
   caseId: string;
   names: { a: string; b: string };
-  myName: string;
-  mySigned: boolean;
+  iAmA: boolean;
+  signed: { a: boolean; b: boolean };
   report: ReportTexts;
 };
 
 const clauseBox = "flex min-h-11 cursor-pointer items-start gap-3 rounded-field border border-hairline bg-surface px-3 py-2.5 text-body-md text-ink has-[:checked]:border-espresso has-[:checked]:bg-rose/20";
 
 // The Peace Treaty: one required clause, personalised and silly optional ones, then sign.
-export async function TreatyCard({ caseId, names, myName, mySigned, report }: Props) {
+export async function TreatyCard({ caseId, names, iAmA, signed, report }: Props) {
+  const mySigned = iAmA ? signed.a : signed.b;
   const t = await getTranslations("treaty");
   const r = (text: string) => renderNames(text, names);
 
@@ -31,12 +33,16 @@ export async function TreatyCard({ caseId, names, myName, mySigned, report }: Pr
         {!mySigned && <p className="text-body-md text-walnut">{t("intro")}</p>}
       </div>
 
-      {mySigned ? (
-        <div className="flex flex-col gap-1">
-          <p className="text-label-docket uppercase text-walnut">{t("signedBy", { name: myName })}</p>
-          <p className="font-[cursive] text-display-verdict text-espresso">{myName}</p>
+      {/* Both signature lines are always visible, so you can see your partner's as soon as they sign. */}
+      <div className="flex flex-col gap-2">
+        <span className="text-label-docket uppercase text-walnut">{t("signatures")}</span>
+        <div className="grid gap-4 md:grid-cols-2">
+          <SignatureBlock name={names.a} signed={signed.a} />
+          <SignatureBlock name={names.b} signed={signed.b} />
         </div>
-      ) : (
+      </div>
+
+      {!mySigned && (
         <form action={signTreaty} className="flex flex-col gap-4">
           <input type="hidden" name="caseId" value={caseId} />
 

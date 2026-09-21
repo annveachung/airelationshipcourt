@@ -2,6 +2,12 @@
 // Qwen's JSON gets less reliable the deeper the nesting goes.
 import { z } from "zod";
 import { CHARGE_IDS, type ChargeId } from "@/lib/cases/charges";
+import {
+  CONFLICT_TYPES,
+  ISSUE_CATEGORIES,
+  normalizeConflictType,
+  normalizeIssue,
+} from "@/lib/cases/taxonomy";
 import { placeholdersIn } from "./names";
 
 // Models sometimes return a lone string where a list is expected.
@@ -13,6 +19,16 @@ const list = (maxItems: number, maxLength: number) =>
 
 const short = (max: number) => z.string().trim().min(1).max(max);
 
+// A model's wording is mapped onto the fixed lists, so a slightly different word never fails.
+const issue = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() ? normalizeIssue(v) : v),
+  z.enum(ISSUE_CATEGORIES),
+);
+const conflictType = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() ? normalizeConflictType(v) : v),
+  z.enum(CONFLICT_TYPES),
+);
+
 export const analysisSchema = z.object({
   topics: list(8, 120),
   emotions: list(10, 120),
@@ -21,9 +37,9 @@ export const analysisSchema = z.object({
   potential_causes: list(8, 200),
   conflict_patterns: list(6, 200),
   follow_up_topics: list(6, 200),
-  primary_issue: short(80),
-  secondary_issue: short(80),
-  conflict_type: short(80),
+  primary_issue: issue,
+  secondary_issue: issue,
+  conflict_type: conflictType,
 });
 export type Analysis = z.infer<typeof analysisSchema>;
 

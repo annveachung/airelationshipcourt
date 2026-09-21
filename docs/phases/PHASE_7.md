@@ -1,5 +1,7 @@
 # Phase 7 — Court Status & Notifications
 
+> **Updated while building:** the panel shows the case profile and conflict intensity as **coarse labels only** (issue and conflict-type labels from fixed, translated lists, and intensity as a Low / Moderate / High / Severe band — never the numbers), so partners can't work out each other's ratings before the verdict. Notifications store a type plus a name and are shown in each person's language, **playful by default with a plain-wording switch** in the bell menu (saved on the profile). One `<CaseLive>` provider polls the case status once for the waiting screens and the panel together; a slower shared provider polls notifications. New: `notifications` table, `court_status()`, `mark_notifications_read()`, `set_my_notification_style()` (migration `20260924000001_court_status_and_notifications.sql`). No email, push or websockets.
+
 ## 1. Goal
 
 Make the case *feel* like a live court process. A persistent Court Status panel shows where the case is, what's done and what's next, what the AI panel is up to, and a case profile drawn from the analysis. A notifications system tells each partner about events that matter ("Your partner has submitted their testimony", "The verdict is ready"). Both run off the same polling loop that already drives the case, so nothing new needs to be connected in real time.

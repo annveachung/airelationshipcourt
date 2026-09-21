@@ -1,5 +1,7 @@
 # Phase 8 — History & Analytics
 
+> **Note from Phase 7:** the analysis' primary issue, secondary issue and conflict type now come from **fixed lists** (`lib/cases/taxonomy.ts`), translated in `messages/*.json`, so issue counts can group on them directly. Cases analysed before Phase 7 may still hold free-text labels — map those with `normalizeIssue()` / `normalizeConflictType()` when aggregating.
+
 ## 1. Goal
 
 Once a couple has a few closed cases, show them the bigger picture: a history of past cases and a set of summary statistics and charts — most common issues, average responsibility, conflict intensity over time, common emotions — including the humorous Argument Stock Market. This is the "product analysis" phase: it adds no new AI and, ideally, no new tables. It's SQL aggregation over data the earlier phases already collect.

@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { CourtSeal } from "@/components/court/court-seal";
+import { SignatureBlock } from "@/components/court/signature-block";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { peaceLevel } from "@/lib/cases/treaty";
@@ -9,13 +10,14 @@ type Props = {
   closedReason: "treaty" | "adjourned" | null;
   signatures: Signature[];
   names: { a: string; b: string };
+  signed: { a: boolean; b: boolean };
 };
 
 // The end of a case: a stamped "CASE CLOSED", the Peace-o-meter for a signed treaty, or a
 // gentle "adjourned" note.
-export async function ClosedBanner({ closedReason, signatures, names }: Props) {
+export async function ClosedBanner({ closedReason, signatures, names, signed }: Props) {
   const t = await getTranslations("closed");
-  const signed = closedReason === "treaty";
+  const treatySigned = closedReason === "treaty";
   const peace = peaceLevel(signatures);
   const pct = peace.possible === 0 ? 0 : Math.round((peace.agreed / peace.possible) * 100);
 
@@ -27,11 +29,19 @@ export async function ClosedBanner({ closedReason, signatures, names }: Props) {
         {t("stamp")}
       </span>
 
-      {signed ? (
+      {treatySigned ? (
         <>
           <div className="flex flex-col gap-1">
             <h2 className="text-headline-lg text-espresso">{t("treatyTitle")}</h2>
             <p className="text-body-md text-walnut">{t("signedBy", { a: names.a, b: names.b })}</p>
+          </div>
+
+          <div className="flex w-full max-w-md flex-col gap-2 text-left">
+            <span className="text-center text-label-docket uppercase text-walnut">{t("signatures")}</span>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <SignatureBlock name={names.a} signed={signed.a} />
+              <SignatureBlock name={names.b} signed={signed.b} />
+            </div>
           </div>
 
           <div className="flex w-full max-w-sm flex-col gap-2">

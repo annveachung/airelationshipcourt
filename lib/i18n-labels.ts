@@ -2,7 +2,7 @@ import type { useTranslations } from "next-intl";
 
 // Option values (feelings, causes, needs...) are stored in the database in English.
 // Only their LABELS are translated. Falls back to the stored value if a label is missing.
-type Group = "emotions" | "causes" | "needs" | "frequency" | "trueFalse";
+type Group = "emotions" | "causes" | "needs" | "frequency" | "trueFalse" | "issues" | "conflictTypes";
 
 export function optionLabel(t: ReturnType<typeof useTranslations>, group: Group, value: string): string {
   const key = `${group}.${value}`;
