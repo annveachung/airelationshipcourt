@@ -1,5 +1,7 @@
 # Phase 8 — History & Analytics
 
+> **Updated while building:** all reads use the RLS client (no new tables or service-role use in app code). A dev-only seed script (`npm run seed:history -- <coupleId>`, clear with `npm run seed:history:clear -- <coupleId>`) inserts 8 varied fake closed cases, titled `[SEED] …`, for local testing — it's the only place in this phase that touches the secret key, and only as a standalone script. Charts use Recharts for the two continuous ones (responsibility distribution, intensity over time) plus hand-built bars for emotions, conflict patterns and the Argument Stock Market, coloured per the `dataviz` skill's method (`lib/charts/palette.ts`): the existing rose/espresso partner pairing for identity, the skill's validated 8-hue categorical set for issues/emotions (folding past 8 into "Other"), and a one-hue ordinal ramp for intensity. The stock market's percentage change is hidden below 3 cases in either 30-day window, per the "percent changes need a floor" decision. The intensity-band thresholds are shared with Phase 7's `court_status()` via `lib/cases/intensity.ts` (SQL copy must stay numerically identical).
+
 > **Note from Phase 7:** the analysis' primary issue, secondary issue and conflict type now come from **fixed lists** (`lib/cases/taxonomy.ts`), translated in `messages/*.json`, so issue counts can group on them directly. Cases analysed before Phase 7 may still hold free-text labels — map those with `normalizeIssue()` / `normalizeConflictType()` when aggregating.
 
 ## 1. Goal

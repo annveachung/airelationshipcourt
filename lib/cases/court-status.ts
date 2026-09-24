@@ -1,9 +1,11 @@
 // Pure and unit-tested (no server-only): what the Court Status panel shows, worked out from the
 // status row that the poll returns. The row holds booleans, states and COARSE labels only.
+import { INTENSITY_LEVEL, type IntensityBand } from "./intensity";
+
+export { INTENSITY_LEVEL, type IntensityBand };
 import { CASE_STAGES, type CaseStage } from "./stages";
 
 export type PanelState = "waiting" | "working" | "ready";
-export type IntensityBand = "low" | "moderate" | "high" | "severe";
 
 export type CourtStatus = {
   stage: CaseStage;
@@ -111,6 +113,3 @@ export function buildChecklist(s: CourtStatus): ChecklistItem[] {
     { key: "treaty", state: step(s.stage === "CLOSED", s.stage === "REPORT") },
   ];
 }
-
-/** Intensity band -> 1..4 filled segments. */
-export const INTENSITY_LEVEL: Record<IntensityBand, number> = { low: 1, moderate: 2, high: 3, severe: 4 };

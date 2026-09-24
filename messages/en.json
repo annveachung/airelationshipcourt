@@ -67,7 +67,18 @@
   "history": {
     "label": "Registry",
     "title": "Verdicts",
-    "body": "Past cases and insights arrive in Phase 8."
+    "empty": "No cases yet. Once you close your first case, it'll show up here.",
+    "thin": "Trends need a few more cases to be meaningful — check back once you've closed a few.",
+    "summaryHeading": "Your case history",
+    "casesCompleted": "Cases completed",
+    "topIssue": "Most common issue",
+    "runnerUp": "Second most common",
+    "avgResponsibility": "Average responsibility",
+    "avgIntensity": "Average intensity",
+    "none": "None yet",
+    "caseListHeading": "Past cases",
+    "insightsLink": "See insights and charts",
+    "viewReport": "View report"
   },
   "newCase": {
     "label": "Docket",
@@ -469,5 +480,27 @@
     "listening": "Listening…",
     "blocked": "Microphone access is blocked. Allow it in your browser settings.",
     "failed": "Voice input isn't working right now. You can type instead."
+  },
+  "insights": {
+    "label": "Registry",
+    "title": "Insights",
+    "back": "Back to case history",
+    "empty": "Close a few cases to unlock charts and trends.",
+    "responsibilityHeading": "Responsibility distribution",
+    "responsibilityBody": "Each case's final split, and the running average.",
+    "average": "Average",
+    "intensityHeading": "Conflict intensity over time",
+    "intensityBody": "How serious each case was, banded from Low to Severe.",
+    "emotionsHeading": "Common emotions",
+    "emotionsBody": "The feelings partners have selected most often in testimony.",
+    "patternsHeading": "Recurring conflict patterns",
+    "patternsBody": "The patterns the court's analysis has spotted most often.",
+    "stockMarketHeading": "The Argument Stock Market",
+    "stockMarketBody": "Which issues have been trending in your last 30 days versus the 30 days before. Not financial advice.",
+    "notEnoughForChange": "Not enough recent cases yet to show a trend.",
+    "scoreboardHeading": "Who's winning",
+    "scoreboard": "{a} {aCount} — {bCount} {b}",
+    "scoreboardTie": "{ties, plural, =0 {} one {, with # tie} other {, with # ties}}",
+    "noData": "Not enough data for this chart yet."
   }
 }
