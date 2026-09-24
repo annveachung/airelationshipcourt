@@ -1,5 +1,6 @@
 import { Scale } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { DevOriginHint } from "@/components/auth/dev-origin-hint";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -28,6 +29,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         )}
         <GoogleButton next={next} />
       </Card>
+      <DevOriginHint />
     </Page>
   );
 }

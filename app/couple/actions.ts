@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { errorKey, INVITE_CODE_PATTERN } from "@/lib/couples";
+import { notifyPartner } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 
 export async function createCouple() {
@@ -39,11 +40,17 @@ export async function acceptInvite(formData: FormData) {
   }
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { error } = await supabase.rpc("accept_invite", { invite_code: code });
   if (error) {
     console.error("accept_invite failed:", error.message);
     redirect(`/join/${code}?error=${errorKey(error.message)}`);
   }
+
+  // Tell the person who invited them that the partner has arrived.
+  if (user) await notifyPartner(user.id, null, "partner_joined");
 
   redirect("/");
 }

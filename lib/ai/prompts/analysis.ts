@@ -1,3 +1,4 @@
+import { CONFLICT_TYPES, ISSUE_CATEGORIES } from "@/lib/cases/taxonomy";
 import { DATA_NOT_INSTRUCTIONS, formatTestimony, type PartnerTestimony } from "./format";
 
 // Keep this example in sync with `analysisSchema` (a test checks that it parses).
@@ -25,8 +26,8 @@ Rules:
 - "discrepancies" are concrete places where the two accounts disagree or can't both be fully right.
 - "follow_up_topics" are the most important UNRESOLVED questions a follow-up round should clear up.
 - Keep every list item short (one sentence at most). Use plain strings only.
-- primary_issue and secondary_issue are one or two words (e.g. Communication, Expectations, Trust, Assumptions, Stress).
-- conflict_type is a short label (e.g. Misunderstanding, Recurring pattern, Clash of priorities).
+- primary_issue and secondary_issue must each be EXACTLY one of: ${ISSUE_CATEGORIES.join(", ")}.
+- conflict_type must be EXACTLY one of: ${CONFLICT_TYPES.join(", ")}.
 
 Respond with only a JSON object in exactly this shape (values are illustrative):
 ${JSON.stringify(ANALYSIS_EXAMPLE, null, 2)}`;

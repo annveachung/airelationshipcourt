@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/auth/avatar";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageMenu } from "@/components/language-menu";
+import { NotificationBell } from "@/components/notification-bell";
+import { NotificationsProvider } from "@/components/notifications-provider";
 import { createClient } from "@/lib/supabase/server";
 import { TabBar } from "./tab-bar";
 import { TopNav } from "./top-nav";
@@ -22,7 +24,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
     user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? user?.email ?? "";
   const avatarUrl: string | null = user?.user_metadata?.avatar_url ?? null;
 
-  return (
+  const shell = (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 border-b border-hairline bg-canvas/85 backdrop-blur-[20px] backdrop-saturate-150">
         <div className={`${container} flex items-center gap-2 py-3 md:gap-6`}>
@@ -33,6 +35,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
           <TopNav />
           <span className="flex-1 md:hidden" />
           <div className="flex items-center gap-1 md:gap-2">
+            {user && <NotificationBell />}
             <LanguageMenu />
             {user && (
               <>
@@ -47,4 +50,5 @@ export async function AppShell({ children }: { children: ReactNode }) {
       <TabBar />
     </div>
   );
+  return user ? <NotificationsProvider>{shell}</NotificationsProvider> : shell;
 }

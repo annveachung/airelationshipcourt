@@ -14,18 +14,6 @@ import type { CaseStage } from "@/lib/cases/stages";
 import type { VerdictBundle } from "@/lib/cases/verdict-data";
 import type { Locale } from "@/lib/i18n";
 
-type Status = {
-  stage: string;
-  aSubmitted: boolean;
-  bSubmitted: boolean;
-  aFollowedUp: boolean;
-  bFollowedUp: boolean;
-  failed: boolean;
-  aSigned: boolean;
-  bSigned: boolean;
-  reportReady: boolean;
-};
-
 type Props = {
   caseId: string;
   stage: CaseStage;
@@ -37,7 +25,6 @@ type Props = {
   mySigned: boolean;
   partnerName: string;
   bundle: VerdictBundle;
-  status: Status;
   errorText: string | null;
 };
 
@@ -53,7 +40,6 @@ export async function VerdictFlow({
   mySigned,
   partnerName,
   bundle,
-  status,
   errorText,
 }: Props) {
   const tVerdict = await getTranslations("verdict");
@@ -70,6 +56,10 @@ export async function VerdictFlow({
     );
   }
 
+  const signed = {
+    a: bundle.signatures.some((s) => s.userId === userIds.a),
+    b: bundle.signatures.some((s) => s.userId === userIds.b),
+  };
   const reportBlocked = stage === "REPORT" || stage === "CLOSED";
   const needsReportWork = !bundle.reportReady || bundle.needsReportTranslation;
   const testimonies = bundle.testimonies.map((x) => ({
@@ -141,15 +131,13 @@ export async function VerdictFlow({
               <TreatyCard
                 caseId={caseId}
                 names={names}
-                myName={iAmA ? names.a : names.b}
-                mySigned={mySigned}
+                iAmA={iAmA}
+                signed={signed}
                 report={bundle.reportTexts}
               />
               {mySigned && (
                 <Card className="print:hidden">
                   <WaitingScreen
-                    caseId={caseId}
-                    initial={status}
                     title={tTreaty("waitingTitle", { name: partnerName })}
                     message={tTreaty("waitingBody")}
                   />
@@ -162,7 +150,7 @@ export async function VerdictFlow({
 
       {stage === "CLOSED" && (
         <>
-          <ClosedBanner closedReason={closedReason} signatures={bundle.signatures} names={names} />
+          <ClosedBanner closedReason={closedReason} signatures={bundle.signatures} names={names} signed={signed} />
           {reportDoc}
         </>
       )}

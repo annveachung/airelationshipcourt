@@ -5,10 +5,12 @@ import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { submitTestimony } from "@/app/cases/actions";
 import { Button } from "@/components/ui/button";
+import { SpeechButton } from "@/components/ui/speech-button";
 import { fieldClasses } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
 import { CAUSES, EMOTIONS, FREQUENCIES, LIMITS, NEEDS } from "@/lib/cases/testimony";
 import { optionLabel } from "@/lib/i18n-labels";
+import { appendSpoken } from "@/lib/voice";
 
 const label = "text-label-docket uppercase text-walnut";
 
@@ -82,21 +84,25 @@ function ChipGroup({
 }
 
 function Note({ name, prompt }: { name: string; prompt: string }) {
-  const [length, setLength] = useState(0);
+  const [value, setValue] = useState("");
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={name} className="text-body-sm text-walnut">
-        {prompt}
-      </label>
+      <div className="flex items-start justify-between gap-3">
+        <label htmlFor={name} className="text-body-sm text-walnut">
+          {prompt}
+        </label>
+        <SpeechButton onText={(text) => setValue((v) => appendSpoken(v, text, LIMITS.note))} />
+      </div>
       <input
         id={name}
         name={name}
         maxLength={LIMITS.note}
-        onChange={(e) => setLength(e.target.value.length)}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
         className={fieldClasses}
       />
       <span className="self-end text-body-sm text-walnut">
-        {length}/{LIMITS.note}
+        {value.length}/{LIMITS.note}
       </span>
     </div>
   );
@@ -113,23 +119,27 @@ function CountedTextarea({
   max: number;
   rows?: number;
 }) {
-  const [length, setLength] = useState(0);
+  const [value, setValue] = useState("");
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={name} className={label}>
-        {legend}
-      </label>
+      <div className="flex items-start justify-between gap-3">
+        <label htmlFor={name} className={label}>
+          {legend}
+        </label>
+        <SpeechButton onText={(text) => setValue((v) => appendSpoken(v, text, max))} />
+      </div>
       <textarea
         id={name}
         name={name}
         rows={rows}
         maxLength={max}
         required
-        onChange={(e) => setLength(e.target.value.length)}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
         className={cn(fieldClasses, "min-h-28 resize-y")}
       />
       <span className="self-end text-body-sm text-walnut">
-        {length}/{max}
+        {value.length}/{max}
       </span>
     </div>
   );

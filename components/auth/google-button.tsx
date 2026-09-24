@@ -11,12 +11,14 @@ export function GoogleButton({ next }: { next: string }) {
 
   async function signIn() {
     setBusy(true);
+    // Remember where to go after signing in (10 minutes). Keeping it out of the redirect address
+    // means Supabase's allowed-URL list only needs the plain ".../auth/callback" address.
+    document.cookie = `auth_next=${encodeURIComponent(next)}; path=/; max-age=600; SameSite=Lax`;
+
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
   }
 

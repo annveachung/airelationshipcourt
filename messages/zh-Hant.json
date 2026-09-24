@@ -357,7 +357,9 @@
     "adjourn": "不簽條約，直接休庭",
     "adjournTitle": "不簽條約就結案嗎？",
     "adjournBody": "案件會為你們兩位結案，之後你們可以提出新的案件。這樣就不會有條約。",
-    "adjournConfirm": "是的，休庭結案"
+    "adjournConfirm": "是的，休庭結案",
+    "signatures": "簽名",
+    "awaiting": "等待{name}簽名"
   },
   "closed": {
     "stamp": "案件已結案",
@@ -374,6 +376,98 @@
       "lovebirds": "閃到不行的恩愛鴛鴦。法庭都臉紅了。"
     },
     "fileNew": "提出新案件",
-    "viewReport": "查看案件報告"
+    "viewReport": "查看案件報告",
+    "signatures": "簽名"
+  },
+  "notifications": {
+    "title": "通知",
+    "open": "通知",
+    "unread": "{count} 則未讀",
+    "empty": "目前沒有通知。有動靜時法庭會告訴你。",
+    "playfulLabel": "俏皮語氣",
+    "partnerFallback": "你的伴侶",
+    "justNow": "剛剛",
+    "playful": {
+      "partner_joined": "你的伴侶已走進法庭。現在開庭。",
+      "case_filed": "{name} 提出了一個案件。請磨利你的記憶。",
+      "partner_testified": "法庭已收到{name}的說法。",
+      "analysis_ready": "法庭已讀完所有證據。你的後續提問準備好了。",
+      "partner_followed_up": "{name} 已回答法庭的提問。球在你這邊了。",
+      "verdict_ready": "判決出爐了。請先做好心理準備。",
+      "partner_signed": "{name} 已簽署條約。換你了。",
+      "case_closed": "結案。去吃頓飯吧。",
+      "case_adjourned": "{name} 讓案件休庭了。法庭今天到此為止。"
+    },
+    "plain": {
+      "partner_joined": "{name} 加入了你們的伴侶檔案。",
+      "case_filed": "{name} 提出了新案件。",
+      "partner_testified": "{name} 已提交證詞。",
+      "analysis_ready": "案件分析完成，你的後續提問已準備好。",
+      "partner_followed_up": "{name} 已回答後續提問。",
+      "verdict_ready": "判決已出。",
+      "partner_signed": "{name} 已簽署條約。",
+      "case_closed": "案件已結案。",
+      "case_adjourned": "{name} 讓案件休庭了。"
+    }
+  },
+  "courtStatus": {
+    "title": "法庭狀態",
+    "progress": "審理進度",
+    "stage": "目前階段",
+    "checklist": "案件狀態",
+    "testified": "{name}已作證",
+    "analysis": "案件分析",
+    "followUp": "後續提問回答",
+    "panel": "審判團評議",
+    "verdict": "最終判決",
+    "treaty": "條約已簽署",
+    "profile": "案件概況",
+    "profileLocked": "法庭分析完案件後才會顯示。",
+    "primary": "主要問題",
+    "secondary": "次要問題",
+    "conflictType": "衝突類型",
+    "intensity": "衝突強度",
+    "intensityLocked": "雙方證詞都送達後才會顯示。",
+    "panelHeading": "AI 審判團",
+    "news": "最新消息",
+    "noNews": "目前沒有消息。",
+    "show": "顯示法庭狀態",
+    "bands": {
+      "low": "低",
+      "moderate": "中等",
+      "high": "高",
+      "severe": "嚴重"
+    },
+    "panelStates": {
+      "waiting": "等待中",
+      "working": "進行中",
+      "ready": "已完成"
+    }
+  },
+  "issues": {
+    "Communication": "溝通",
+    "Expectations": "期待落差",
+    "Assumptions": "主觀臆測",
+    "Trust": "信任",
+    "Stress": "壓力",
+    "Time and priorities": "時間與優先順序",
+    "Chores or money": "家事或金錢",
+    "Family or friends": "家人或朋友",
+    "Other": "其他"
+  },
+  "conflictTypes": {
+    "Misunderstanding": "誤會",
+    "Recurring pattern": "反覆出現的模式",
+    "Clash of priorities": "優先順序衝突",
+    "Broken promise": "違背承諾",
+    "Different styles": "風格不同",
+    "Other": "其他"
+  },
+  "voice": {
+    "speak": "語音輸入",
+    "stop": "停止",
+    "listening": "聆聽中…",
+    "blocked": "麥克風權限被封鎖。請在瀏覽器設定中允許使用。",
+    "failed": "語音輸入目前無法使用，你可以改用打字。"
   }
 }
