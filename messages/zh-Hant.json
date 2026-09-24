@@ -67,7 +67,18 @@
   "history": {
     "label": "登記處",
     "title": "判決",
-    "body": "過往案件與分析將在第 8 階段推出。"
+    "empty": "還沒有案件。結案後，案件會顯示在這裡。",
+    "thin": "案件數量還太少，趨勢圖還不太有意義——多結幾個案子後再回來看看。",
+    "summaryHeading": "你們的案件紀錄",
+    "casesCompleted": "已完成案件數",
+    "topIssue": "最常見的問題",
+    "runnerUp": "第二常見",
+    "avgResponsibility": "平均責任比例",
+    "avgIntensity": "平均衝突強度",
+    "none": "尚無資料",
+    "caseListHeading": "過往案件",
+    "insightsLink": "查看分析與圖表",
+    "viewReport": "查看報告"
   },
   "newCase": {
     "label": "案件簿",
@@ -469,5 +480,27 @@
     "listening": "聆聽中…",
     "blocked": "麥克風權限被封鎖。請在瀏覽器設定中允許使用。",
     "failed": "語音輸入目前無法使用，你可以改用打字。"
+  },
+  "insights": {
+    "label": "登記處",
+    "title": "分析",
+    "back": "回到案件紀錄",
+    "empty": "結幾個案子後，就能解鎖圖表與趨勢分析。",
+    "responsibilityHeading": "責任比例分布",
+    "responsibilityBody": "每個案件的最終分配比例，以及累計平均值。",
+    "average": "平均",
+    "intensityHeading": "衝突強度趨勢",
+    "intensityBody": "每個案件的嚴重程度，分為「低」到「嚴重」四級。",
+    "emotionsHeading": "常見情緒",
+    "emotionsBody": "雙方在證詞中最常勾選的感受。",
+    "patternsHeading": "反覆出現的衝突模式",
+    "patternsBody": "法庭分析中最常出現的模式。",
+    "stockMarketHeading": "爭執證券交易所",
+    "stockMarketBody": "過去 30 天與再往前 30 天相比，哪些問題正在升溫。純屬娛樂，非財務建議。",
+    "notEnoughForChange": "近期案件數量還不足以顯示趨勢。",
+    "scoreboardHeading": "誰比較「贏」",
+    "scoreboard": "{a} {aCount} 比 {bCount} {b}",
+    "scoreboardTie": "{ties, plural, =0 {} other {，平手 # 次}}",
+    "noData": "這張圖表目前資料還不夠。"
   }
 }
