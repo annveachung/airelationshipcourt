@@ -1,6 +1,11 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArgumentStockMarket } from "@/components/court/charts/argument-stock-market";
+import { ConflictPatterns } from "@/components/court/charts/conflict-patterns";
+import { EmotionCounts } from "@/components/court/charts/emotion-counts";
+import { IntensityOverTime } from "@/components/court/charts/intensity-over-time";
+import { ResponsibilityDistribution } from "@/components/court/charts/responsibility-distribution";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,12 +13,15 @@ import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getCoupleHistory } from "@/lib/analytics/history";
 import { getCoupleStats } from "@/lib/analytics/stats";
+import { stockMarket, whosWinning } from "@/lib/analytics/stock-market";
 import { getMyCouple } from "@/lib/couples";
 import { optionLabel } from "@/lib/i18n-labels";
 import { createClient } from "@/lib/supabase/server";
 
 const THIN_DATA = 3;
 
+// The Archive: one place for a couple's relationship history — the open case (if any), the
+// analytics dashboard, and every closed case, instead of splitting these across separate tabs.
 export default async function HistoryPage() {
   const t = await getTranslations("history");
   const tAll = await getTranslations();
@@ -40,15 +48,33 @@ export default async function HistoryPage() {
     );
   }
 
-  const cases = await getCoupleHistory(supabase, couple.coupleId);
+  const [{ data: openCases }, cases] = await Promise.all([
+    supabase.from("cases").select("id, title, stage").neq("stage", "CLOSED"),
+    getCoupleHistory(supabase, couple.coupleId),
+  ]);
+  const openCase = openCases?.[0] ?? null;
+
   const stats = await getCoupleStats(supabase, couple.coupleId, cases);
   const dateFormat = new Intl.DateTimeFormat(locale);
   const nameA = couple.me.role === "partner_a" ? couple.me.name : couple.partner.name;
   const nameB = couple.me.role === "partner_b" ? couple.me.name : couple.partner.name;
 
   return (
-    <Page className="gap-6">
+    <Page className="gap-6 md:max-w-3xl">
       <SectionHeading label={t("label")} title={t("title")} />
+
+      {openCase && (
+        <Link
+          href={`/cases/${openCase.id}`}
+          className="flex items-center justify-between gap-3 rounded-card border border-hairline-strong bg-rose/20 p-4 shadow-card focus-visible:outline-2 focus-visible:outline-espresso"
+        >
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="text-label-docket uppercase text-walnut">{t("inProgress")}</span>
+            <span className="truncate text-body-md font-medium text-espresso">{openCase.title}</span>
+          </div>
+          <span className="shrink-0 text-body-sm font-medium text-espresso">{t("goToCase")}</span>
+        </Link>
+      )}
 
       {stats.casesCompleted === 0 ? (
         <Card>
@@ -74,10 +100,24 @@ export default async function HistoryPage() {
               ))}
             </dl>
             {stats.casesCompleted < THIN_DATA && <p className="text-body-sm text-walnut">{t("thin")}</p>}
-            <Button href="/history/insights" variant="secondary" className="self-start">
-              {t("insightsLink")}
-            </Button>
           </Card>
+
+          <div className="flex flex-col gap-6">
+            <h2 className="text-label-docket uppercase text-walnut">{t("dashboardHeading")}</h2>
+            <ResponsibilityDistribution
+              points={stats.responsibilityOverTime}
+              names={{ a: nameA, b: nameB }}
+              avg={stats.avgResponsibility}
+            />
+            <IntensityOverTime points={stats.intensityOverTime} />
+            <EmotionCounts counts={stats.emotionCounts} />
+            <ConflictPatterns counts={stats.conflictPatternCounts} />
+            <ArgumentStockMarket
+              rows={stockMarket(stats.issueSharePerPeriod.current, stats.issueSharePerPeriod.previous)}
+              winning={whosWinning(stats.results)}
+              names={{ a: nameA, b: nameB }}
+            />
+          </div>
 
           <section className="flex flex-col gap-3">
             <h2 className="text-label-docket uppercase text-walnut">{t("caseListHeading")}</h2>

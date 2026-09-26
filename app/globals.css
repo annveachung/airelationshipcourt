@@ -93,3 +93,44 @@ html:lang(zh-Hant) body * {
     font-size: 16px;
   }
 }
+
+/* The landing page's animated hero background (see components/auth/gradient-backdrop.tsx).
+   Built from the app's own tokens; a slow drift across four stops. */
+.gradient-backdrop {
+  /* Kept inside the light canvas/rose range on purpose: the hero text is set in espresso, so a
+     dark stop anywhere in the loop would make it unreadable at that point in the animation. */
+  background: linear-gradient(
+    120deg,
+    var(--color-canvas) 0%,
+    var(--color-rose) 30%,
+    var(--color-canvas) 55%,
+    var(--color-recessed) 80%,
+    var(--color-canvas) 100%
+  );
+  background-size: 300% 300%;
+  background-position: 0% 50%;
+}
+
+/* Smooth-scrolls anchor jumps (the landing page's arrow-to-sign-in link). Harmless
+   elsewhere: it only affects anchor/scrollIntoView navigation, not <details> toggles. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .gradient-backdrop {
+    animation: gradient-drift 18s ease-in-out infinite;
+  }
+}
+
+@keyframes gradient-drift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

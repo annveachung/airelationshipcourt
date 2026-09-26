@@ -10,9 +10,9 @@
     "mainNav": "主要導覽"
   },
   "nav": {
-    "docket": "案件簿",
     "fileCase": "提出案件",
-    "verdicts": "判決"
+    "home": "首頁",
+    "archive": "檔案室"
   },
   "roles": {
     "partnerA": "伴侶 A",
@@ -20,12 +20,13 @@
     "you": "（你）"
   },
   "login": {
-    "badge": "法庭書記官",
     "title": "請報上你的大名。",
     "subtitle": "登入後，法庭才知道是誰在作證。",
     "google": "使用 Google 繼續",
     "googleBusy": "正在開啟 Google…",
-    "failed": "登入未成功，請再試一次。"
+    "failed": "登入未成功，請再試一次。",
+    "heroTagline": "兩位伴侶、一場爭執，一場公平（而且有點荒謬）的審理。",
+    "scrollHint": "向下捲動以登入"
   },
   "couple": {
     "registry": "登記處",
@@ -78,7 +79,7 @@
   },
   "history": {
     "label": "登記處",
-    "title": "判決",
+    "title": "檔案室",
     "empty": "還沒有案件。結案後，案件會顯示在這裡。",
     "thin": "案件數量還太少，趨勢圖還不太有意義——多結幾個案子後再回來看看。",
     "summaryHeading": "你們的案件紀錄",
@@ -89,8 +90,10 @@
     "avgIntensity": "平均衝突強度",
     "none": "尚無資料",
     "caseListHeading": "過往案件",
-    "insightsLink": "查看分析與圖表",
-    "viewReport": "查看報告"
+    "viewReport": "查看報告",
+    "goToCase": "繼續這個案件",
+    "inProgress": "進行中",
+    "dashboardHeading": "趨勢與模式"
   },
   "newCase": {
     "label": "案件簿",
@@ -494,10 +497,6 @@
     "failed": "語音輸入目前無法使用，你可以改用打字。"
   },
   "insights": {
-    "label": "登記處",
-    "title": "分析",
-    "back": "回到案件紀錄",
-    "empty": "結幾個案子後，就能解鎖圖表與趨勢分析。",
     "responsibilityHeading": "責任比例分布",
     "responsibilityBody": "每個案件的最終分配比例，以及累計平均值。",
     "average": "平均",
