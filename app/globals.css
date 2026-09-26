@@ -80,8 +80,8 @@ html:lang(zh-Hant) body * {
   letter-spacing: normal;
 }
 
-/* Headline display type (Y2K reskin, Stitch "01 Cyber-Cute / Tamagotchi" pairing): via the
-   utility classes themselves — Tailwind's text-* composition only sets
+/* Pixel display type (Y2K reskin): headings + docket labels/case numbers, via the utility
+   classes themselves — Tailwind's text-* composition only sets
    size/line-height/letter-spacing/weight, not font-family, so this is a plain CSS rule rather
    than a theme token. Long-form body/report text stays on Inter (--font-sans) so testimony and
    reports stay fully legible. Falls back to --font-sans if --font-display isn't loaded (e.g.
@@ -89,18 +89,12 @@ html:lang(zh-Hant) body * {
 .text-display-verdict,
 .text-headline-lg,
 .text-headline-md,
-.text-headline-sm {
+.text-headline-sm,
+.text-label-docket {
   font-family: var(--font-display, var(--font-sans));
 }
 
-/* Docket labels/case numbers pair with the pixel font (buttons/badges), not the headline font —
-   same Stitch pairing. */
-.text-label-docket {
-  font-family: var(--font-pixel, var(--font-sans));
-}
-
-/* Y2K pixel-arcade buttons (bevel shapes ported from the Stitch "Y2K Pixel Button Design System"
-   showcase; font is Silkscreen per the later "01 Cyber-Cute / Tamagotchi" typography pairing).
+/* Y2K pixel-arcade buttons (ported from the Stitch "Y2K Pixel Button Design System" showcase).
    Plain CSS classes rather than Tailwind utilities — the stepped multi-layer bevel shadows are
    not expressible as a single reusable shadow token. Chinese labels fall back to --font-sans
    (this font has no CJK glyphs) and the global zh-Hant rule already zeroes letter-spacing;
