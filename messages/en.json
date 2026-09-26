@@ -53,7 +53,6 @@
     "submit": "Join the court"
   },
   "docket": {
-    "badge": "Court is in session",
     "title": "Your docket",
     "noneBody": "Every case needs two parties. Create your couple, then invite your partner.",
     "createCouple": "Create a couple",
@@ -62,7 +61,20 @@
     "openCase": "Go to your open case",
     "fileCase": "File a case",
     "casesHeading": "Cases",
-    "noCases": "No cases yet. File your first one."
+    "noCases": "No cases yet. File your first one.",
+    "badgeNone": "No case on the docket",
+    "badgePending": "Waiting for the other side",
+    "badgeIdle": "Peace, for now",
+    "status": {
+      "CASE_OPEN": "Case just filed",
+      "TESTIMONY": "Testimony underway",
+      "ANALYSIS": "Case under review",
+      "FOLLOW_UP": "Follow-up round",
+      "PANEL_JUDGEMENT": "Panel deliberating",
+      "VERDICT": "Verdict is in",
+      "RECOMMENDATIONS": "Reviewing recommendations",
+      "REPORT": "Finalising the report"
+    }
   },
   "history": {
     "label": "Registry",
