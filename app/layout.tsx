@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
-import { Inter, Silkscreen, Unbounded } from "next/font/google";
+import { Inter, Press_Start_2P, Silkscreen } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { SoundProvider } from "@/components/sound-provider";
 import "./globals.css";
@@ -11,21 +11,23 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-// Headline display face (see globals.css) — from the Stitch "01 Cyber-Cute / Tamagotchi"
-// pairing: wide, rounded, 1999–2003 cyber-tech proportions. Headings/case titles only. Chinese
-// text falls back to Inter/PingFang automatically (Unbounded has no CJK glyphs).
-const headlineDisplay = Unbounded({
+// The pixel display face for headings and docket labels/case numbers only (see globals.css) — a
+// clean bitmap font with real regular + bold weights (unlike VT323's single thin weight, so
+// label-docket's bold token renders as an actual bold face, not a browser-synthesized fake).
+// Chinese text falls back to Inter/PingFang automatically (Silkscreen has no CJK glyphs).
+const pixelDisplay = Silkscreen({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["800"],
+  weight: ["400", "700"],
 });
 
-// The pixel face for buttons/badges/docket labels (same Stitch pairing) — a clean bitmap font
-// with real regular + bold weights. Chinese text falls back to Inter/PingFang (no CJK glyphs).
-const pixel = Silkscreen({
+// The literal 8-bit pixel face for buttons/badges (from the Stitch "Y2K Pixel Button Design
+// System"). Only ships weight 400 — that's all Google Fonts has for it. Chinese text falls back
+// to Inter/PingFang (no CJK glyphs in this font, same as Baloo above).
+const pixel = Press_Start_2P({
   variable: "--font-pixel-raw",
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -45,7 +47,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${headlineDisplay.variable} ${pixel.variable} h-full antialiased`}
+      className={`${inter.variable} ${pixelDisplay.variable} ${pixel.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans">
         <NextIntlClientProvider>
