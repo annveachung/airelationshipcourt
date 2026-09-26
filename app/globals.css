@@ -80,16 +80,17 @@ html:lang(zh-Hant) body * {
   letter-spacing: normal;
 }
 
-/* Playful display type (Y2K reskin): headings only, via the utility classes themselves —
-   Tailwind's text-* composition only sets size/line-height/letter-spacing/weight, not
-   font-family, so this is a plain CSS rule rather than a theme token. Body/label text stays on
-   Inter (--font-sans) so long-form testimony and report copy stays fully legible. Falls back
-   to --font-sans if --font-display isn't loaded (e.g. this file loaded before layout.tsx sets
-   it), so headings are never left unstyled. */
+/* Pixel display type (Y2K reskin): headings + docket labels/case numbers, via the utility
+   classes themselves — Tailwind's text-* composition only sets
+   size/line-height/letter-spacing/weight, not font-family, so this is a plain CSS rule rather
+   than a theme token. Long-form body/report text stays on Inter (--font-sans) so testimony and
+   reports stay fully legible. Falls back to --font-sans if --font-display isn't loaded (e.g.
+   this file loaded before layout.tsx sets it), so text is never left unstyled. */
 .text-display-verdict,
 .text-headline-lg,
 .text-headline-md,
-.text-headline-sm {
+.text-headline-sm,
+.text-label-docket {
   font-family: var(--font-display, var(--font-sans));
 }
 

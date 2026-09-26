@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
-import { Baloo_2, Inter, Press_Start_2P } from "next/font/google";
+import { Inter, Press_Start_2P, Silkscreen } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { SoundProvider } from "@/components/sound-provider";
 import "./globals.css";
@@ -11,13 +11,14 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-// The playful Y2K display face for headings only (see globals.css) — bubbly but still fully
-// legible. Chinese headline text falls back to Inter/PingFang automatically (Baloo 2 has no
-// CJK glyphs), so no special-casing is needed per locale.
-const baloo = Baloo_2({
+// The pixel display face for headings and docket labels/case numbers only (see globals.css) — a
+// clean bitmap font with real regular + bold weights (unlike VT323's single thin weight, so
+// label-docket's bold token renders as an actual bold face, not a browser-synthesized fake).
+// Chinese text falls back to Inter/PingFang automatically (Silkscreen has no CJK glyphs).
+const pixelDisplay = Silkscreen({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["400", "700"],
 });
 
 // The literal 8-bit pixel face for buttons/badges (from the Stitch "Y2K Pixel Button Design
@@ -46,7 +47,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${baloo.variable} ${pixel.variable} h-full antialiased`}
+      className={`${inter.variable} ${pixelDisplay.variable} ${pixel.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans">
         <NextIntlClientProvider>
