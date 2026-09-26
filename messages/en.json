@@ -7,12 +7,14 @@
     "brand": "AI Relationship Court",
     "signOut": "Sign out",
     "language": "Language",
-    "mainNav": "Main navigation"
+    "mainNav": "Main navigation",
+    "soundOn": "Turn sound on",
+    "soundOff": "Turn sound off"
   },
   "nav": {
-    "docket": "Docket",
     "fileCase": "File Case",
-    "verdicts": "Verdicts"
+    "home": "Home",
+    "archive": "The Archive"
   },
   "roles": {
     "partnerA": "Partner A",
@@ -20,12 +22,13 @@
     "you": "(you)"
   },
   "login": {
-    "badge": "Court clerk",
     "title": "Please state your name.",
     "subtitle": "Sign in so the court knows who is testifying.",
     "google": "Continue with Google",
     "googleBusy": "Opening Google…",
-    "failed": "Sign-in didn't go through. Please try again."
+    "failed": "Sign-in didn't go through. Please try again.",
+    "heroTagline": "Two partners, one disagreement, a fair (and slightly ridiculous) hearing.",
+    "scrollHint": "Scroll to sign in"
   },
   "couple": {
     "registry": "Registry",
@@ -78,7 +81,7 @@
   },
   "history": {
     "label": "Registry",
-    "title": "Verdicts",
+    "title": "The Archive",
     "empty": "No cases yet. Once you close your first case, it'll show up here.",
     "thin": "Trends need a few more cases to be meaningful — check back once you've closed a few.",
     "summaryHeading": "Your case history",
@@ -89,8 +92,10 @@
     "avgIntensity": "Average intensity",
     "none": "None yet",
     "caseListHeading": "Past cases",
-    "insightsLink": "See insights and charts",
-    "viewReport": "View report"
+    "viewReport": "View report",
+    "goToCase": "Continue this case",
+    "inProgress": "In progress",
+    "dashboardHeading": "Trends and patterns"
   },
   "newCase": {
     "label": "Docket",
@@ -494,10 +499,6 @@
     "failed": "Voice input isn't working right now. You can type instead."
   },
   "insights": {
-    "label": "Registry",
-    "title": "Insights",
-    "back": "Back to case history",
-    "empty": "Close a few cases to unlock charts and trends.",
     "responsibilityHeading": "Responsibility distribution",
     "responsibilityBody": "Each case's final split, and the running average.",
     "average": "Average",

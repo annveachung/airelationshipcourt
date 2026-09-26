@@ -16,11 +16,23 @@
   --color-hairline: rgb(62 39 35 / 0.08);
   --color-hairline-strong: rgb(62 39 35 / 0.15);
 
-  --radius-card: 1rem;
-  --radius-field: 0.75rem;
+  /* Y2K pixel-arcade treatment (from the Stitch "Y2K Pixel Button Design System" showcase) —
+     hard-edged 3-4px borders and stepped pixel bevels instead of soft blurs, built from the same
+     espresso/rose/canvas palette plus a few extra bevel steps that palette doesn't have. */
+  --color-espresso-bevel-hi: #63433c;
+  --color-espresso-bevel-mid: #241411;
+  --color-espresso-bevel-lo: #130907;
+  --color-espresso-outline: #1a0e0b;
+  --color-espresso-hover-bg: #4d322d;
+  --color-rose-bevel-hi: #fff5f8;
+  --color-rose-bevel-mid: #d898ac;
+  --color-rose-bevel-lo: #8f4c62;
+  --color-rose-hover-bg: #ffd6e2;
 
-  --shadow-card: 0 2px 8px -2px rgb(62 39 35 / 0.04),
-    0 8px 24px -4px rgb(62 39 35 / 0.06);
+  --radius-card: 0px;
+  --radius-field: 0px;
+
+  --shadow-card: 6px 6px 0 0 var(--color-espresso);
   --shadow-float: 0 16px 40px -8px rgb(62 39 35 / 0.12);
 
   --text-display-verdict: 34px;
@@ -53,6 +65,9 @@
 
 @theme inline {
   --font-sans: var(--font-inter), "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
+  /* The pixel-arcade face, with the same CJK fallback chain as --font-sans (it has no CJK
+     glyphs) — registering it here also gives Tailwind a `font-pixel` utility class. */
+  --font-pixel: var(--font-pixel-raw), var(--font-sans);
 }
 
 body {
@@ -63,6 +78,102 @@ body {
 /* Chinese text: no negative/positive tracking (it's designed for Latin letters). */
 html:lang(zh-Hant) body * {
   letter-spacing: normal;
+}
+
+/* Playful display type (Y2K reskin): headings only, via the utility classes themselves —
+   Tailwind's text-* composition only sets size/line-height/letter-spacing/weight, not
+   font-family, so this is a plain CSS rule rather than a theme token. Body/label text stays on
+   Inter (--font-sans) so long-form testimony and report copy stays fully legible. Falls back
+   to --font-sans if --font-display isn't loaded (e.g. this file loaded before layout.tsx sets
+   it), so headings are never left unstyled. */
+.text-display-verdict,
+.text-headline-lg,
+.text-headline-md,
+.text-headline-sm {
+  font-family: var(--font-display, var(--font-sans));
+}
+
+/* Y2K pixel-arcade buttons (ported from the Stitch "Y2K Pixel Button Design System" showcase).
+   Plain CSS classes rather than Tailwind utilities — the stepped multi-layer bevel shadows are
+   not expressible as a single reusable shadow token. Chinese labels fall back to --font-sans
+   (this font has no CJK glyphs) and the global zh-Hant rule already zeroes letter-spacing;
+   uppercase is a no-op on CJK text either way. */
+.btn-pixel {
+  font-family: var(--font-pixel), var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-width: 3px;
+  border-style: solid;
+  transition: transform 60ms steps(2), box-shadow 60ms steps(2), background-color 60ms steps(2);
+}
+
+.btn-pixel-primary {
+  background-color: var(--color-espresso);
+  color: var(--color-canvas);
+  border-color: var(--color-espresso-outline);
+  box-shadow:
+    inset 3px 3px 0 0 var(--color-espresso-bevel-hi),
+    inset -3px -3px 0 0 var(--color-espresso-bevel-mid),
+    inset -5px -5px 0 0 var(--color-espresso-bevel-lo),
+    0 4px 0 0 var(--color-espresso-outline),
+    0 7px 0 0 rgb(244 201 214 / 0.4);
+}
+.btn-pixel-primary:hover {
+  background-color: var(--color-espresso-hover-bg);
+  color: var(--color-rose);
+  box-shadow:
+    inset 3px 3px 0 0 #7d564d,
+    inset -3px -3px 0 0 var(--color-espresso-bevel-mid),
+    inset -5px -5px 0 0 var(--color-espresso-bevel-lo),
+    0 5px 0 0 var(--color-espresso-outline),
+    0 8px 0 0 var(--color-rose);
+  transform: translateY(-2px);
+}
+.btn-pixel-primary:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 3px 3px 0 0 var(--color-espresso-bevel-lo),
+    inset -2px -2px 0 0 var(--color-espresso-bevel-hi),
+    0 0 0 0 var(--color-espresso-outline);
+}
+
+.btn-pixel-secondary {
+  background-color: var(--color-rose);
+  color: var(--color-espresso);
+  border-color: var(--color-espresso);
+  box-shadow:
+    inset 3px 3px 0 0 var(--color-rose-bevel-hi),
+    inset -3px -3px 0 0 var(--color-rose-bevel-mid),
+    inset -5px -5px 0 0 var(--color-rose-bevel-lo),
+    0 4px 0 0 var(--color-espresso),
+    0 6px 0 0 rgb(62 39 35 / 0.35);
+}
+.btn-pixel-secondary:hover {
+  background-color: var(--color-rose-hover-bg);
+  box-shadow:
+    inset 4px 4px 0 0 #ffffff,
+    inset -4px -4px 0 0 #e59eb3,
+    inset -6px -6px 0 0 #9a4f67,
+    0 4px 0 0 var(--color-espresso),
+    0 7px 0 0 rgb(62 39 35 / 0.45);
+  transform: translateY(-2px);
+}
+.btn-pixel-secondary:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 3px 3px 0 0 var(--color-rose-bevel-lo),
+    inset -2px -2px 0 0 var(--color-rose-bevel-hi),
+    0 0 0 0 var(--color-espresso);
+}
+
+/* Small pixel chip (Badge, and anywhere a mini pixel-bordered tag is used). Only the font and
+   the offset shadow live here — border and background stay Tailwind utilities on the caller side
+   (see badge.tsx) so a caller can still override them (e.g. charge-list.tsx's custom border/bg),
+   the same way `uppercase`/`normal-case` already compose there. */
+.chip-pixel {
+  font-family: var(--font-pixel), var(--font-sans);
+  letter-spacing: 0.02em;
+  box-shadow: 2px 2px 0 0 var(--color-espresso);
 }
 
 /* Printing / "Save as PDF": just the page content, black on white. */
@@ -91,5 +202,46 @@ html:lang(zh-Hant) body * {
   textarea,
   select {
     font-size: 16px;
+  }
+}
+
+/* The landing page's animated hero background (see components/auth/gradient-backdrop.tsx).
+   Built from the app's own tokens; a slow drift across four stops. */
+.gradient-backdrop {
+  /* Kept inside the light canvas/rose range on purpose: the hero text is set in espresso, so a
+     dark stop anywhere in the loop would make it unreadable at that point in the animation. */
+  background: linear-gradient(
+    120deg,
+    var(--color-canvas) 0%,
+    var(--color-rose) 30%,
+    var(--color-canvas) 55%,
+    var(--color-recessed) 80%,
+    var(--color-canvas) 100%
+  );
+  background-size: 300% 300%;
+  background-position: 0% 50%;
+}
+
+/* Smooth-scrolls anchor jumps (the landing page's arrow-to-sign-in link). Harmless
+   elsewhere: it only affects anchor/scrollIntoView navigation, not <details> toggles. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .gradient-backdrop {
+    animation: gradient-drift 18s ease-in-out infinite;
+  }
+}
+
+@keyframes gradient-drift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }

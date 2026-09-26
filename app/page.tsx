@@ -1,5 +1,5 @@
+import { Gavel } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/auth/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -27,9 +27,22 @@ async function PartnerRow({ partner, isMe }: { partner: Partner; isMe: boolean }
   );
 }
 
+// A slim "who's paired up" line — the couple's names, de-emphasised so the CTA below it stays
+// the clear focus of the page.
+function PartnerStrip({ me, partner }: { me: Partner; partner: Partner }) {
+  return (
+    <div className="flex items-center gap-2 text-body-sm text-walnut">
+      <Avatar name={me.name} url={me.avatarUrl} className="size-6 text-body-sm" />
+      <span className="truncate">{me.name}</span>
+      <span aria-hidden>&amp;</span>
+      <Avatar name={partner.name} url={partner.avatarUrl} className="size-6 text-body-sm" />
+      <span className="truncate">{partner.name}</span>
+    </div>
+  );
+}
+
 export default async function Home() {
   const t = await getTranslations("docket");
-  const tStages = await getTranslations("stages");
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,12 +51,10 @@ export default async function Home() {
 
   const couple = await getMyCouple(user.id);
 
+  // Only what's needed to decide the CTA — the full case list now lives on the Archive page.
   const { data: cases } =
     couple.kind === "active"
-      ? await supabase
-          .from("cases")
-          .select("id, title, stage, created_at")
-          .order("created_at", { ascending: false })
+      ? await supabase.from("cases").select("id, stage").order("created_at", { ascending: false })
       : { data: null };
   const openCase = cases?.find((c) => c.stage !== "CLOSED");
 
@@ -57,23 +68,21 @@ export default async function Home() {
           : t("badgeIdle");
 
   return (
-    <div className="flex flex-col gap-6 md:gap-8">
-      <div className="flex flex-col gap-3">
+    <div className="mx-auto flex max-w-xl flex-col items-center gap-6 text-center md:gap-8">
+      <div className="flex flex-col items-center gap-3">
         <Badge>{statusBadge}</Badge>
-        <h1 className="text-display-verdict text-espresso md:text-[44px] md:leading-[52px]">
-          {t("title")}
-        </h1>
+        <h1 className="text-display-verdict text-espresso md:text-[44px] md:leading-[52px]">{t("title")}</h1>
       </div>
 
       {couple.kind === "none" && (
-        <Card variant="verdict" className="flex max-w-xl flex-col gap-4">
+        <Card variant="verdict" className="flex w-full flex-col gap-4 text-left">
           <p className="text-body-md text-ink">{t("noneBody")}</p>
           <Button href="/couple/new">{t("createCouple")}</Button>
         </Card>
       )}
 
       {couple.kind === "pending" && (
-        <Card variant="verdict" className="flex max-w-xl flex-col gap-4">
+        <Card variant="verdict" className="flex w-full flex-col gap-4 text-left">
           <PartnerRow partner={couple.me} isMe />
           <p className="text-body-md text-ink">{t("waitingPartner")}</p>
           <Button href="/couple/invite" variant="secondary">
@@ -83,43 +92,14 @@ export default async function Home() {
       )}
 
       {couple.kind === "active" && (
-        <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8">
-          <Card variant="verdict" className="flex flex-col gap-4">
-            <PartnerRow partner={couple.me} isMe />
-            <PartnerRow partner={couple.partner} isMe={false} />
-            {openCase ? (
-              <Button href={`/cases/${openCase.id}`}>{t("openCase")}</Button>
-            ) : (
-              <Button href="/cases/new">{t("fileCase")}</Button>
-            )}
+        <div className="flex w-full flex-col items-center gap-4">
+          <PartnerStrip me={couple.me} partner={couple.partner} />
+          <Card variant="verdict" className="flex w-full flex-col items-center gap-4 py-10">
+            <Gavel size={40} className="text-espresso" aria-hidden />
+            <Button href={openCase ? `/cases/${openCase.id}` : "/cases/new"} className="w-full md:w-auto md:px-12">
+              {openCase ? t("openCase") : t("fileCase")}
+            </Button>
           </Card>
-
-          <section className="flex flex-col gap-3" aria-labelledby="cases-heading">
-            <h2 id="cases-heading" className="text-label-docket uppercase text-walnut">
-              {t("casesHeading")}
-            </h2>
-            {cases && cases.length > 0 ? (
-              <ul className="flex flex-col gap-3">
-                {cases.map((c) => (
-                  <li key={c.id}>
-                    <Link
-                      href={c.stage === "CLOSED" ? `/cases/${c.id}/report` : `/cases/${c.id}`}
-                      className="flex min-h-14 items-center justify-between gap-3 rounded-card border border-hairline bg-surface px-4 py-3 shadow-card focus-visible:outline-2 focus-visible:outline-espresso"
-                    >
-                      <span className="min-w-0 truncate text-body-md font-medium text-espresso">
-                        {c.title}
-                      </span>
-                      <Badge className="shrink-0">{tStages(c.stage as CaseStage)}</Badge>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Card>
-                <p className="text-body-md text-walnut">{t("noCases")}</p>
-              </Card>
-            )}
-          </section>
         </div>
       )}
     </div>

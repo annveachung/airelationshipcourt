@@ -6,6 +6,7 @@ import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageMenu } from "@/components/language-menu";
 import { NotificationBell } from "@/components/notification-bell";
 import { NotificationsProvider } from "@/components/notifications-provider";
+import { SoundToggle } from "@/components/sound-toggle";
 import { createClient } from "@/lib/supabase/server";
 import { TabBar } from "./tab-bar";
 import { TopNav } from "./top-nav";
@@ -36,6 +37,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
           <span className="flex-1 md:hidden" />
           <div className="flex items-center gap-1 md:gap-2">
             {user && <NotificationBell />}
+            <SoundToggle />
             <LanguageMenu />
             {user && (
               <>
