@@ -8,7 +8,7 @@ export function Card({ variant = "default", className, children, ...props }: Pro
     <div
       {...props}
       className={cn(
-        "relative rounded-card border border-hairline bg-surface p-4 shadow-card",
+        "relative rounded-card border-2 border-espresso bg-surface p-4 shadow-card",
         variant === "verdict" && "p-6",
         className,
       )}

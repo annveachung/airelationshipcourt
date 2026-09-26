@@ -7,7 +7,9 @@
     "brand": "AI Relationship Court",
     "signOut": "Sign out",
     "language": "Language",
-    "mainNav": "Main navigation"
+    "mainNav": "Main navigation",
+    "soundOn": "Turn sound on",
+    "soundOff": "Turn sound off"
   },
   "nav": {
     "fileCase": "File Case",
