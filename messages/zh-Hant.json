@@ -53,7 +53,6 @@
     "submit": "加入法庭"
   },
   "docket": {
-    "badge": "法庭開庭中",
     "title": "你的案件簿",
     "noneBody": "每個案件都需要雙方當事人。請先建立你們的伴侶檔案，再邀請你的伴侶。",
     "createCouple": "建立伴侶檔案",
@@ -62,7 +61,20 @@
     "openCase": "前往進行中的案件",
     "fileCase": "提出案件",
     "casesHeading": "案件",
-    "noCases": "還沒有案件。提出你們的第一個案件吧。"
+    "noCases": "還沒有案件。提出你們的第一個案件吧。",
+    "badgeNone": "案件簿上尚無案件",
+    "badgePending": "等待另一方加入",
+    "badgeIdle": "暫時和平",
+    "status": {
+      "CASE_OPEN": "案件剛提出",
+      "TESTIMONY": "作證進行中",
+      "ANALYSIS": "案件審閱中",
+      "FOLLOW_UP": "後續提問回合",
+      "PANEL_JUDGEMENT": "審判團評議中",
+      "VERDICT": "判決已出",
+      "RECOMMENDATIONS": "建議審閱中",
+      "REPORT": "報告撰寫中"
+    }
   },
   "history": {
     "label": "登記處",

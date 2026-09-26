@@ -47,10 +47,19 @@ export default async function Home() {
       : { data: null };
   const openCase = cases?.find((c) => c.stage !== "CLOSED");
 
+  const statusBadge =
+    couple.kind === "none"
+      ? t("badgeNone")
+      : couple.kind === "pending"
+        ? t("badgePending")
+        : openCase
+          ? t(`status.${openCase.stage}` as `status.${Exclude<CaseStage, "CLOSED">}`)
+          : t("badgeIdle");
+
   return (
     <div className="flex flex-col gap-6 md:gap-8">
       <div className="flex flex-col gap-3">
-        <Badge>{t("badge")}</Badge>
+        <Badge>{statusBadge}</Badge>
         <h1 className="text-display-verdict text-espresso md:text-[44px] md:leading-[52px]">
           {t("title")}
         </h1>
