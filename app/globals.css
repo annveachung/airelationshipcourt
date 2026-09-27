@@ -15,6 +15,8 @@
   --color-error: #ba1a1a;
   --color-hairline: rgb(62 39 35 / 0.08);
   --color-hairline-strong: rgb(62 39 35 / 0.15);
+  /* A stronger rose for small pixel-art hearts, which wash out in --color-rose on white. */
+  --color-heart: #d9728f;
 
   /* Y2K pixel-arcade treatment (from the Stitch "Y2K Pixel Button Design System" showcase) —
      hard-edged 3-4px borders and stepped pixel bevels instead of soft blurs, built from the same
@@ -194,6 +196,22 @@ html:lang(zh-Hant) body * {
   }
 }
 
+/* Sign-in emblem: the hearts on the pixel scales take turns hopping one pixel, like an idle
+   game sprite. Stepped, not smooth, and off under reduced motion. */
+@keyframes pixel-hop {
+  50% {
+    transform: translateY(-1px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-pixel-hop {
+    animation: pixel-hop 1.6s steps(1) infinite;
+  }
+  .animate-pixel-hop-late {
+    animation: pixel-hop 1.6s steps(1) -0.8s infinite;
+  }
+}
+
 /* Printing / "Save as PDF": just the page content, black on white. */
 @media print {
   header,
@@ -238,6 +256,13 @@ html:lang(zh-Hant) body * {
   );
   background-size: 300% 300%;
   background-position: 0% 50%;
+}
+
+/* On the landing page the header sits directly on the moving gradient (still frosted, no cream
+   bar or bottom rule), so the gradient reads as one surface from the top of the screen down. */
+body:has(.gradient-backdrop) header {
+  background-color: transparent;
+  border-color: transparent;
 }
 
 /* Smooth-scrolls anchor jumps (the landing page's arrow-to-sign-in link). Harmless

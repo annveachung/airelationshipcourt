@@ -23,7 +23,7 @@
   },
   "login": {
     "title": "請報上你的大名。",
-    "subtitle": "登入後，法庭才知道是誰在作證。",
+    "subtitle": "登入以出庭作證。",
     "google": "使用 Google 繼續",
     "googleBusy": "正在開啟 Google…",
     "failed": "登入未成功，請再試一次。",
