@@ -181,6 +181,19 @@ html:lang(zh-Hant) body * {
   box-shadow: 2px 2px 0 0 var(--color-espresso);
 }
 
+/* Arcade "press start" blink for the Home prompt. Stepped on/off rather than a fade, and only
+   when the viewer hasn't asked for reduced motion. */
+@keyframes pixel-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-pixel-blink {
+    animation: pixel-blink 1.2s steps(2) infinite;
+  }
+}
+
 /* Printing / "Save as PDF": just the page content, black on white. */
 @media print {
   header,
