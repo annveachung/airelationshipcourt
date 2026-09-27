@@ -56,7 +56,15 @@
     "submit": "加入法庭"
   },
   "docket": {
-    "title": "你的案件簿",
+    "titleNone": "開始新遊戲",
+    "titlePending": "等待玩家二加入",
+    "titleReady": "雙方玩家已就位",
+    "titleInProgress": "回合進行中",
+    "casesHeard": "已審案件",
+    "openNow": "進行中",
+    "pressStart": "兩人都準備好了，就按開始",
+    "resume": "你們的案件正在等著",
+    "waitingSlot": "等待中…",
     "noneBody": "每個案件都需要雙方當事人。請先建立你們的伴侶檔案，再邀請你的伴侶。",
     "createCouple": "建立伴侶檔案",
     "waitingPartner": "正在等待你的伴侶加入。",

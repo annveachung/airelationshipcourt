@@ -56,7 +56,15 @@
     "submit": "Join the court"
   },
   "docket": {
-    "title": "Your docket",
+    "titleNone": "Start a new game",
+    "titlePending": "Waiting for player 2",
+    "titleReady": "Both players ready",
+    "titleInProgress": "Round in progress",
+    "casesHeard": "Cases heard",
+    "openNow": "Open",
+    "pressStart": "Press start when you're both ready",
+    "resume": "Your case is waiting",
+    "waitingSlot": "Waiting…",
     "noneBody": "Every case needs two parties. Create your couple, then invite your partner.",
     "createCouple": "Create a couple",
     "waitingPartner": "Waiting for your partner to join.",
