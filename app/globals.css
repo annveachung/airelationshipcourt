@@ -64,7 +64,7 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-inter), "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
   /* The pixel-arcade face, with the same CJK fallback chain as --font-sans (it has no CJK
      glyphs) — registering it here also gives Tailwind a `font-pixel` utility class. */
   --font-pixel: var(--font-pixel-raw), var(--font-sans);
@@ -80,18 +80,21 @@ html:lang(zh-Hant) body * {
   letter-spacing: normal;
 }
 
-/* Pixel display type (Y2K reskin): headings + docket labels/case numbers, via the utility
-   classes themselves — Tailwind's text-* composition only sets
-   size/line-height/letter-spacing/weight, not font-family, so this is a plain CSS rule rather
-   than a theme token. Long-form body/report text stays on Inter (--font-sans) so testimony and
-   reports stay fully legible. Falls back to --font-sans if --font-display isn't loaded (e.g.
-   this file loaded before layout.tsx sets it), so text is never left unstyled. */
+/* Pixel display type (Y2K reskin): headings only, via the utility classes themselves —
+   Tailwind's text-* composition only sets size/line-height/letter-spacing/weight, not
+   font-family, so this is a plain CSS rule rather than a theme token. Long-form body/report
+   text stays on Figtree (--font-sans) so testimony and reports stay fully legible. Falls back
+   to --font-sans if --font-display isn't loaded, so text is never left unstyled. */
 .text-display-verdict,
 .text-headline-lg,
 .text-headline-md,
-.text-headline-sm,
-.text-label-docket {
+.text-headline-sm {
   font-family: var(--font-display, var(--font-sans));
+}
+
+/* Brand mark, docket labels and case numbers: the terminal mono, same fallback idea. */
+.text-label-docket {
+  font-family: var(--font-label, var(--font-sans));
 }
 
 /* Y2K pixel-arcade buttons (ported from the Stitch "Y2K Pixel Button Design System" showcase).
@@ -167,13 +170,14 @@ html:lang(zh-Hant) body * {
     0 0 0 0 var(--color-espresso);
 }
 
-/* Small pixel chip (Badge, and anywhere a mini pixel-bordered tag is used). Only the font and
+/* Small pixel chip (Badge, and anywhere a mini pixel-bordered tag is used). Badges carry case
+   numbers and statuses, so they use the label mono rather than the 8-bit button face; the hard
+   border and offset shadow keep the pixel look. Only the font and
    the offset shadow live here — border and background stay Tailwind utilities on the caller side
    (see badge.tsx) so a caller can still override them (e.g. charge-list.tsx's custom border/bg),
    the same way `uppercase`/`normal-case` already compose there. */
 .chip-pixel {
-  font-family: var(--font-pixel), var(--font-sans);
-  letter-spacing: 0.02em;
+  font-family: var(--font-label, var(--font-sans));
   box-shadow: 2px 2px 0 0 var(--color-espresso);
 }
 

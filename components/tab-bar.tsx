@@ -27,7 +27,7 @@ export function TabBar() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-14 flex-col items-center justify-center gap-1 text-label-docket uppercase",
+                  "flex min-h-14 flex-col items-center justify-center gap-1 text-[12px] font-bold leading-4",
                   active ? "text-espresso" : "text-walnut",
                 )}
               >
