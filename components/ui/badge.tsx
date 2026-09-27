@@ -11,7 +11,7 @@ export function Badge({ className, children, ...props }: ComponentProps<"span">)
       {...props}
       className={cn(
         "chip-pixel inline-flex items-center gap-1.5 border-2 border-espresso px-2.5 py-1",
-        "text-[9px] uppercase text-espresso",
+        "text-label-docket uppercase text-espresso",
         "bg-rose",
         className,
       )}
