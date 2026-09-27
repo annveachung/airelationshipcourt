@@ -65,6 +65,9 @@
     "pressStart": "Press start when you're both ready",
     "resume": "Your case is waiting",
     "waitingSlot": "Waiting…",
+    "gemsLabel": "Gems: {count}",
+    "streakLabel": "Win streak: {count}",
+    "scoreHelp": "Found less responsible? That case earns you a gem. Win in a row to build a streak.",
     "noneBody": "Every case needs two parties. Create your couple, then invite your partner.",
     "createCouple": "Create a couple",
     "waitingPartner": "Waiting for your partner to join.",
@@ -142,7 +145,8 @@
     "panelTitle": "The panel is deliberating",
     "panelBody": "All the evidence is in. The verdict arrives in the next phase of the build.",
     "stillBuilding": "This part of the court is still being built.",
-    "backToCase": "Back to the case"
+    "backToCase": "Back to the case",
+    "backToArchive": "Back to The Archive"
   },
   "testimony": {
     "whatHappened": "What happened?",
@@ -399,6 +403,9 @@
   },
   "closed": {
     "stamp": "Case closed",
+    "details": "Details",
+    "complaint": "What the case was about",
+    "adjournedShort": "Adjourned without a treaty",
     "treatyTitle": "Treaty signed",
     "signedBy": "Signed by {a} and {b}",
     "adjournedTitle": "Case adjourned",

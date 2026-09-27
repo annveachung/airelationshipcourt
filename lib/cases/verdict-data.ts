@@ -5,7 +5,6 @@ import "server-only";
 import { reportTextsSchema, verdictTextsSchema, type ReportTexts, type VerdictTexts } from "@/lib/ai/schemas";
 import type { PanelRole, PanelScores } from "@/lib/cases/aggregate";
 import type { VerdictCharges } from "@/lib/cases/charges";
-import type { TestimonyView } from "@/components/court/testimonies-view";
 import type { Locale } from "@/lib/i18n";
 import type { createClient } from "@/lib/supabase/server";
 
@@ -29,23 +28,16 @@ export type VerdictBundle = {
   panel: Partial<Record<PanelRole, { a: number; b: number }>>;
   panelScores: PanelScores | null; // only when all three members are present
   panelSummaryDone: boolean;
-  testimonies: (Omit<TestimonyView, "name"> & { user_id: string })[];
   signatures: Signature[];
 };
 
 export async function loadVerdictBundle(db: Db, caseId: string, locale: Locale): Promise<VerdictBundle> {
-  const [verdictRes, vTextRes, rTextRes, panelRes, testimonyRes, signatureRes] =
+  const [verdictRes, vTextRes, rTextRes, panelRes, signatureRes] =
     await Promise.all([
       db.from("verdicts").select("*").eq("case_id", caseId).maybeSingle(),
       db.from("verdict_texts").select("locale, content").eq("case_id", caseId),
       db.from("report_texts").select("locale, content").eq("case_id", caseId),
       db.from("panel_assessments").select("role, responsibility_partner_a, responsibility_partner_b").eq("case_id", caseId),
-      db
-        .from("testimonies")
-        .select(
-          "user_id, what_happened, frequency, causes, cause_note, emotions, severity, partner_did_wrong, needs, needs_note",
-        )
-        .eq("case_id", caseId),
       db.from("treaty_signatures").select("user_id, clauses").eq("case_id", caseId),
     ]);
 
@@ -89,7 +81,6 @@ export async function loadVerdictBundle(db: Db, caseId: string, locale: Locale):
     panel,
     panelScores,
     panelSummaryDone: !!v.value,
-    testimonies: (testimonyRes.data ?? []) as VerdictBundle["testimonies"],
     signatures: (signatureRes.data ?? []).map((s) => ({ userId: s.user_id, clauses: s.clauses as string[] })),
   };
 }

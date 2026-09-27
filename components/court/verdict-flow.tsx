@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import { AdviceScreen } from "@/components/court/advice-screen";
-import { ClosedBanner } from "@/components/court/closed-banner";
 import { ReportDocument } from "@/components/court/report-document";
 import { ReportPreparer } from "@/components/court/report-preparer";
 import { StageStepper } from "@/components/court/stage-stepper";
@@ -17,7 +16,6 @@ import type { Locale } from "@/lib/i18n";
 type Props = {
   caseId: string;
   stage: CaseStage;
-  closedReason: "treaty" | "adjourned" | null;
   locale: Locale;
   names: { a: string; b: string };
   userIds: { a: string; b: string };
@@ -28,11 +26,11 @@ type Props = {
   errorText: string | null;
 };
 
-// Everything from the verdict onward: verdict -> advice -> report (+ treaty) -> closed.
+// Everything from the verdict onward: verdict -> advice -> report (+ treaty). A CLOSED case is
+// shown on its report page instead (the case page redirects there).
 export async function VerdictFlow({
   caseId,
   stage,
-  closedReason,
   locale,
   names,
   userIds,
@@ -60,12 +58,8 @@ export async function VerdictFlow({
     a: bundle.signatures.some((s) => s.userId === userIds.a),
     b: bundle.signatures.some((s) => s.userId === userIds.b),
   };
-  const reportBlocked = stage === "REPORT" || stage === "CLOSED";
+  const reportBlocked = stage === "REPORT";
   const needsReportWork = !bundle.reportReady || bundle.needsReportTranslation;
-  const testimonies = bundle.testimonies.map((x) => ({
-    ...x,
-    name: x.user_id === userIds.a ? names.a : names.b,
-  }));
 
   const errorBanner = errorText && (
     <p role="alert" className="text-body-sm text-error">
@@ -81,7 +75,6 @@ export async function VerdictFlow({
       texts={texts}
       report={bundle.reportTexts}
       agreement={bundle.panelScores ? panelAgreement(bundle.panelScores) : null}
-      testimonies={testimonies}
     />
   );
 
@@ -145,13 +138,6 @@ export async function VerdictFlow({
               )}
             </>
           )}
-        </>
-      )}
-
-      {stage === "CLOSED" && (
-        <>
-          <ClosedBanner closedReason={closedReason} signatures={bundle.signatures} names={names} signed={signed} />
-          {reportDoc}
         </>
       )}
     </div>

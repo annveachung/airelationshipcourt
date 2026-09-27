@@ -65,6 +65,9 @@
     "pressStart": "兩人都準備好了，就按開始",
     "resume": "你們的案件正在等著",
     "waitingSlot": "等待中…",
+    "gemsLabel": "寶石：{count}",
+    "streakLabel": "連勝：{count}",
+    "scoreHelp": "被判責任較少的一方贏得該案，獲得一顆寶石。連續獲勝就能累積連勝紀錄。",
     "noneBody": "每個案件都需要雙方當事人。請先建立你們的伴侶檔案，再邀請你的伴侶。",
     "createCouple": "建立伴侶檔案",
     "waitingPartner": "正在等待你的伴侶加入。",
@@ -142,7 +145,8 @@
     "panelTitle": "審判團正在評議",
     "panelBody": "所有證據都已齊備。判決將在下一個開發階段推出。",
     "stillBuilding": "法庭的這個部分仍在建置中。",
-    "backToCase": "回到案件"
+    "backToCase": "回到案件",
+    "backToArchive": "回到檔案室"
   },
   "testimony": {
     "whatHappened": "發生了什麼事？",
@@ -399,6 +403,9 @@
   },
   "closed": {
     "stamp": "案件已結案",
+    "details": "詳情",
+    "complaint": "案件內容",
+    "adjournedShort": "未簽和約即休庭",
     "treatyTitle": "條約已簽署",
     "signedBy": "由{a}與{b}簽署",
     "adjournedTitle": "案件已休庭",
