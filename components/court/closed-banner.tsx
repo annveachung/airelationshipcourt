@@ -1,8 +1,8 @@
 import { ChevronDown } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { CaseStamp } from "@/components/court/case-stamp";
 import { SignatureBlock } from "@/components/court/signature-block";
 import { PixelTreaty } from "@/components/pixel-icons";
-import { Button } from "@/components/ui/button";
 import { peaceLevel } from "@/lib/cases/treaty";
 import type { Signature } from "@/lib/cases/verdict-data";
 
@@ -11,13 +11,17 @@ type Props = {
   signatures: Signature[];
   names: { a: string; b: string };
   signed: { a: boolean; b: boolean };
-  context: string | null;
+  // The court's own 2–3 sentence summary of the case (names already filled in), not what either
+  // partner typed; null until the report exists.
+  summary: string | null;
+  closedOn: string | null;
 };
 
-// The end of a case, shown above the report: one compact bar (treaty signed, or adjourned) that
-// expands into what the case was about, the signatures and the Peace-o-meter. Collapsed by
-// default so the report starts right below it. Printing always shows it opened (globals.css).
-export async function ClosedBanner({ closedReason, signatures, names, signed, context }: Props) {
+// The end of a case, shown above the report: one compact bar (treaty signed, or adjourned) with a
+// "Case closed" rubber stamp inked across it, expanding into the case summary, the signatures and
+// the Peace-o-meter. Collapsed by default so the report starts right below it. Printing always
+// shows it opened (globals.css).
+export async function ClosedBanner({ closedReason, signatures, names, signed, summary, closedOn }: Props) {
   const t = await getTranslations("closed");
   const treatySigned = closedReason === "treaty";
   const peace = peaceLevel(signatures);
@@ -25,10 +29,10 @@ export async function ClosedBanner({ closedReason, signatures, names, signed, co
 
   return (
     <details className="group border-2 border-espresso bg-surface shadow-card">
-      <summary className="flex cursor-pointer list-none items-center gap-4 p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-espresso [&::-webkit-details-marker]:hidden">
+      <summary className="relative flex cursor-pointer list-none items-center gap-4 p-4 pb-12 sm:pb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-espresso [&::-webkit-details-marker]:hidden">
         <PixelTreaty sealed={treatySigned} className="shrink-0" />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-label-docket uppercase text-rose-deep">{t("stamp")}</span>
+          <span className="sr-only">{t("stamp")}</span>
           <span className="text-headline-sm text-espresso">
             {treatySigned ? t("treatyTitle") : t("adjournedShort")}
           </span>
@@ -40,13 +44,22 @@ export async function ClosedBanner({ closedReason, signatures, names, signed, co
           <span className="hidden sm:inline">{t("details")}</span>
           <ChevronDown size={18} aria-hidden className="transition-transform group-open:rotate-180" />
         </span>
+        {/* Inked onto the bar like a real stamp, kept inside its edges (no sideways scrolling) and
+            clear of the arrow. Phones: smaller, in a strip of extra space at the bottom of the bar
+            (pb-12), so it doesn't sit on top of the title or the "signed by" line. Wider: in the
+            open space beside "Details". */}
+        <CaseStamp
+          label={t("stamp")}
+          date={closedOn}
+          className="absolute bottom-2 right-9 sm:bottom-auto sm:right-24 sm:top-1/2 sm:-translate-y-1/2"
+        />
       </summary>
 
       <div className="flex flex-col gap-5 border-t-2 border-dashed border-espresso/25 p-4 md:p-6">
-        {context && (
+        {summary && (
           <div className="flex flex-col gap-1">
             <span className="text-label-docket uppercase text-walnut">{t("complaint")}</span>
-            <p className="break-words text-body-md text-ink">{context}</p>
+            <p className="break-words text-body-md text-ink">{summary}</p>
           </div>
         )}
 
@@ -83,10 +96,6 @@ export async function ClosedBanner({ closedReason, signatures, names, signed, co
         ) : (
           <p className="text-body-md text-walnut">{t("adjournedBody")}</p>
         )}
-
-        <Button href="/cases/new" variant="secondary" className="self-start print:hidden">
-          {t("fileNew")}
-        </Button>
       </div>
     </details>
   );

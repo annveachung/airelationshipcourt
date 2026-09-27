@@ -17,6 +17,8 @@
   --color-hairline-strong: rgb(62 39 35 / 0.15);
   /* A stronger rose for small pixel-art hearts, which wash out in --color-rose on white. */
   --color-heart: #d9728f;
+  /* Rubber-stamp ink for the "Case closed" stamp: a deeper rose-red than --color-heart. */
+  --color-stamp: #b8405e;
 
   /* Y2K pixel-arcade treatment (from the Stitch "Y2K Pixel Button Design System" showcase) —
      hard-edged 3-4px borders and stepped pixel bevels instead of soft blurs, built from the same
@@ -209,6 +211,26 @@ html:lang(zh-Hant) body * {
   }
   .animate-pixel-hop-late {
     animation: pixel-hop 1.6s steps(1) -0.8s infinite;
+  }
+}
+
+/* The "Case closed" rubber stamp lands with a quick thunk (scale only, so it keeps its own tilt). */
+@keyframes stamp-in {
+  0% {
+    scale: 1.6;
+    opacity: 0;
+  }
+  60% {
+    scale: 0.94;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-stamp-in {
+    animation: stamp-in 380ms ease-out both;
   }
 }
 

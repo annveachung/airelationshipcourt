@@ -8,6 +8,7 @@ import { ReportPreparer } from "@/components/court/report-preparer";
 import { TranslationGate } from "@/components/court/translation-gate";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { renderNames } from "@/lib/ai/names";
 import { panelAgreement } from "@/lib/cases/panel-agreement";
 import { CASE_STAGES, type CaseStage } from "@/lib/cases/stages";
 import { loadVerdictBundle } from "@/lib/cases/verdict-data";
@@ -35,7 +36,7 @@ export default async function ReportPage({ params }: PageProps<"/cases/[caseId]/
 
   const { data: theCase } = await supabase
     .from("cases")
-    .select("id, title, stage, context, closed_reason")
+    .select("id, title, stage, closed_reason, closed_at")
     .eq("id", caseId)
     .maybeSingle();
   if (!theCase) notFound();
@@ -64,6 +65,11 @@ export default async function ReportPage({ params }: PageProps<"/cases/[caseId]/
     b: bundle.signatures.some((s) => s.userId === userIds.b),
   };
   const { verdict, verdictTexts: texts, reportTexts: report } = bundle;
+  const closedOn = theCase.closed_at
+    ? new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(
+        new Date(theCase.closed_at),
+      )
+    : null;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
@@ -89,7 +95,8 @@ export default async function ReportPage({ params }: PageProps<"/cases/[caseId]/
           signatures={bundle.signatures}
           names={names}
           signed={signed}
-          context={theCase.context}
+          summary={report ? renderNames(report.case_summary, names) : null}
+          closedOn={closedOn}
         />
       )}
 
@@ -106,6 +113,7 @@ export default async function ReportPage({ params }: PageProps<"/cases/[caseId]/
           texts={texts}
           report={report}
           agreement={bundle.panelScores ? panelAgreement(bundle.panelScores) : null}
+          hideCaseSummary={closed}
         />
       ) : (
         <Card>
