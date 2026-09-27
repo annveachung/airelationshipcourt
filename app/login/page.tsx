@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { DevOriginHint } from "@/components/auth/dev-origin-hint";
 import { GoogleButton } from "@/components/auth/google-button";
 import { GradientBackdrop } from "@/components/auth/gradient-backdrop";
-import { CourtSeal } from "@/components/court/court-seal";
+import { PixelScales } from "@/components/auth/pixel-scales";
 import { Card } from "@/components/ui/card";
 import { Page } from "@/components/ui/page";
 import { safeNext } from "@/lib/auth";
@@ -16,13 +16,21 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <div>
-      {/* Hero: the first thing a new visitor sees. Bleeds past the shell's own padding so the
-          gradient reaches the viewport edges; the shell's header stays (small brand bar). */}
-      <section className="relative -mx-5 -mt-6 flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center gap-6 overflow-hidden px-5 text-center md:-mx-8 md:-mt-10 md:px-8">
-        <GradientBackdrop />
-        <CourtSeal className="size-20" />
+      <GradientBackdrop />
+
+      {/* Hero: the first thing a new visitor sees. The gradient behind it is fixed to the whole
+          viewport; the shell's header stays (small brand bar). */}
+      <section className="relative -mt-6 flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center gap-6 text-center md:-mt-10">
+        <PixelScales />
         <div className="flex flex-col gap-3">
-          <h1 className="text-display-verdict text-espresso md:text-[56px] md:leading-[60px]">{t("title")}</h1>
+          {/* Always one line: Silkscreen sets this title about 17.7em wide, so the size scales
+              with the screen (leaving the page padding) and caps at 52px on desktop. */}
+          <h1
+            className="whitespace-nowrap text-display-verdict leading-tight text-espresso"
+            style={{ fontSize: "min(52px, calc((100vw - 3rem) / 17.7))" }}
+          >
+            {t("title")}
+          </h1>
           <p className="mx-auto max-w-md text-body-lg text-walnut">{t("heroTagline")}</p>
         </div>
         <a

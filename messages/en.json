@@ -23,7 +23,7 @@
   },
   "login": {
     "title": "Please state your name.",
-    "subtitle": "Sign in so the court knows who is testifying.",
+    "subtitle": "Sign in to testify.",
     "google": "Continue with Google",
     "googleBusy": "Opening Google…",
     "failed": "Sign-in didn't go through. Please try again.",
