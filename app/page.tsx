@@ -1,9 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/auth/avatar";
+import { PixelFlame, PixelGem } from "@/components/pixel-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getCoupleHistory } from "@/lib/analytics/history";
+import { caseWinner, scoreboard, type PlayerScore } from "@/lib/analytics/scoreboard";
 import type { CaseStage } from "@/lib/cases/stages";
 import { cn } from "@/lib/cn";
 import { getMyCouple, type CoupleState, type Partner } from "@/lib/couples";
@@ -27,11 +30,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 // One side of the "player select" screen. An empty seat (partner not joined yet) is drawn as a
 // dashed outline instead of a filled tile.
-async function PlayerTile({ number, role, player, isMe }: {
+async function PlayerTile({ number, role, player, isMe, score }: {
   number: 1 | 2;
   role: Partner["role"];
   player: Partner | null;
   isMe: boolean;
+  score: PlayerScore | null;
 }) {
   const t = await getTranslations("docket");
   const tRoles = await getTranslations("roles");
@@ -62,6 +66,23 @@ async function PlayerTile({ number, role, player, isMe }: {
         {role === "partner_a" ? tRoles("partnerA") : tRoles("partnerB")}
         {isMe && ` ${tRoles("you")}`}
       </span>
+      {score && (
+        <div className="mt-1 flex items-center gap-3 text-label-docket tabular-nums text-espresso">
+          <span className="flex items-center gap-1" title={t("gemsLabel", { count: score.gems })}>
+            <PixelGem />
+            <span aria-hidden>{score.gems}</span>
+            <span className="sr-only">{t("gemsLabel", { count: score.gems })}</span>
+          </span>
+          <span
+            className={cn("flex items-center gap-1", score.streak === 0 && "opacity-40")}
+            title={t("streakLabel", { count: score.streak })}
+          >
+            <PixelFlame />
+            <span aria-hidden>{score.streak}</span>
+            <span className="sr-only">{t("streakLabel", { count: score.streak })}</span>
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -77,10 +98,14 @@ export default async function Home() {
   const couple = await getMyCouple(user.id);
 
   // Only what's needed for the CTA and the score bar — the full case list lives on the Archive page.
-  const { data: cases } =
+  const [{ data: cases }, history] =
     couple.kind === "active"
-      ? await supabase.from("cases").select("id, stage").order("created_at", { ascending: false })
-      : { data: null };
+      ? await Promise.all([
+          supabase.from("cases").select("id, stage").order("created_at", { ascending: false }),
+          getCoupleHistory(supabase, couple.coupleId),
+        ])
+      : [{ data: null }, []];
+  const scores = couple.kind === "active" ? scoreboard(history.map(caseWinner)) : null;
   const openCase = cases?.find((c) => c.stage !== "CLOSED");
   const casesHeard = cases?.filter((c) => c.stage === "CLOSED").length ?? 0;
   const casesOpen = cases?.filter((c) => c.stage !== "CLOSED").length ?? 0;
@@ -124,12 +149,30 @@ export default async function Home() {
       {couple.kind !== "none" && (
         <>
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:gap-4">
-            <PlayerTile number={1} role="partner_a" player={p1} isMe={p1?.userId === myId} />
-            <span aria-hidden className="font-pixel text-base text-rose-deep">
-              ♥
+            <PlayerTile
+              number={1}
+              role="partner_a"
+              player={p1}
+              isMe={p1?.userId === myId}
+              score={scores?.partner_a ?? null}
+            />
+            {/* Arcade "VS" sticker between the two players. */}
+            <span
+              aria-hidden
+              className="-rotate-6 border-2 border-espresso bg-rose px-1.5 py-1 font-pixel text-[11px] text-espresso shadow-[2px_2px_0_0_var(--color-espresso)]"
+            >
+              VS
             </span>
-            <PlayerTile number={2} role="partner_b" player={p2} isMe={p2?.userId === myId} />
+            <PlayerTile
+              number={2}
+              role="partner_b"
+              player={p2}
+              isMe={p2?.userId === myId}
+              score={scores?.partner_b ?? null}
+            />
           </div>
+
+          {scores && <p className="-mt-2 text-center text-body-sm text-walnut">{t("scoreHelp")}</p>}
 
           {couple.kind === "active" && (
             <div className="flex items-center justify-between bg-espresso px-3 py-2.5 text-label-docket uppercase text-canvas">

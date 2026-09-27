@@ -36,10 +36,12 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
   // Row Level Security only returns cases belonging to my couple.
   const { data: theCase } = await supabase
     .from("cases")
-    .select("id, title, context, stage, last_error, closed_reason")
+    .select("id, title, context, stage, last_error")
     .eq("id", caseId)
     .maybeSingle();
   if (!theCase) notFound();
+  // A closed case lives on its report page (banner + report), so there is one view of it, not two.
+  if (theCase.stage === "CLOSED") redirect(`/cases/${caseId}/report`);
 
   const couple = await getMyCouple(user.id);
   if (couple.kind !== "active") notFound();
@@ -178,7 +180,6 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
         <VerdictFlow
           caseId={caseId}
           stage={stage}
-          closedReason={theCase.closed_reason as "treaty" | "adjourned" | null}
           locale={locale}
           names={names}
           userIds={userIds}

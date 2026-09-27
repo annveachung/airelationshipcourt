@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { CourtSeal } from "@/components/court/court-seal";
 import { ChargeList } from "@/components/court/charge-list";
-import { TestimoniesView, type TestimonyView } from "@/components/court/testimonies-view";
 import { Card } from "@/components/ui/card";
 import { renderNames } from "@/lib/ai/names";
 import type { ReportTexts, VerdictTexts } from "@/lib/ai/schemas";
@@ -16,10 +15,10 @@ type Props = {
   texts: VerdictTexts;
   report: ReportTexts;
   agreement: PanelAgreement | null;
-  testimonies: TestimonyView[];
 };
 
-// The full written record: the 13 sections from the spec, then the raw answers and testimonies.
+// The full written record: the 13 sections from the spec. Testimonies are deliberately left out —
+// each partner only ever sees their own.
 export async function ReportDocument({
   caseNumber,
   names,
@@ -27,7 +26,6 @@ export async function ReportDocument({
   texts,
   report,
   agreement,
-  testimonies,
 }: Props) {
   const t = await getTranslations("report");
   const tRoles = await getTranslations("panelRoles");
@@ -139,7 +137,6 @@ export async function ReportDocument({
         </div>,
       )}
 
-      {testimonies.length > 0 && <TestimoniesView testimonies={testimonies} />}
     </Card>
   );
 }
