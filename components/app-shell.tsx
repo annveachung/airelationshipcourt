@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { Scale } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/auth/avatar";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { BrandMark } from "@/components/brand-mark";
 import { LanguageMenu } from "@/components/language-menu";
 import { NotificationBell } from "@/components/notification-bell";
 import { NotificationsProvider } from "@/components/notifications-provider";
@@ -30,7 +30,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-20 border-b border-hairline bg-canvas/85 backdrop-blur-[20px] backdrop-saturate-150">
         <div className={`${container} flex items-center gap-2 py-3 md:gap-6`}>
           <div className="flex items-center gap-2">
-            <Scale size={20} className="text-espresso" aria-hidden />
+            <BrandMark />
             <span className="text-label-docket uppercase text-espresso">{t("brand")}</span>
           </div>
           <TopNav />
