@@ -89,7 +89,13 @@ export default async function HistoryPage() {
                   [t("casesCompleted"), String(stats.casesCompleted)],
                   [t("topIssue"), stats.topIssues[0] ? optionLabel(tAll, "issues", stats.topIssues[0].issue) : t("none")],
                   [t("runnerUp"), stats.topIssues[1] ? optionLabel(tAll, "issues", stats.topIssues[1].issue) : t("none")],
-                  [t("avgResponsibility"), `${nameA} ${stats.avgResponsibility.a}% / ${nameB} ${stats.avgResponsibility.b}%`],
+                  [
+                    t("avgResponsibility"),
+                    <>
+                      <span className="block">{`${nameA} ${stats.avgResponsibility.a}%`}</span>
+                      <span className="block">{`${nameB} ${stats.avgResponsibility.b}%`}</span>
+                    </>,
+                  ],
                 ] as const
               ).map(([label, value]) => (
                 <div key={label} className="flex flex-col gap-0.5">
