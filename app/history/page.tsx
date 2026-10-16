@@ -1,9 +1,8 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArgumentStockMarket } from "@/components/court/charts/argument-stock-market";
-import { ConflictPatterns } from "@/components/court/charts/conflict-patterns";
 import { BlameDistribution } from "@/components/court/charts/blame-distribution";
+import { PatternTally } from "@/components/court/charts/pattern-tally";
 import { PeaceCalendar, type ConflictDay } from "@/components/court/charts/peace-calendar";
 import { PastCases, type PastCaseRow } from "@/components/court/past-cases";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getCoupleHistory } from "@/lib/analytics/history";
 import { getCoupleStats } from "@/lib/analytics/stats";
-import { stockMarket, whosWinning } from "@/lib/analytics/stock-market";
 import { getMyCouple } from "@/lib/couples";
 import { optionLabel } from "@/lib/i18n-labels";
 import { createClient } from "@/lib/db/server";
@@ -138,12 +136,7 @@ export default async function HistoryPage() {
             <h2 className="text-label-docket uppercase text-walnut">{t("dashboardHeading")}</h2>
             <PeaceCalendar conflicts={conflictDays} courtOpenedAt={courtOpenedAt} />
             <BlameDistribution names={{ a: nameA, b: nameB }} avg={stats.avgResponsibility} moreResponsible={moreResponsible} />
-            <ConflictPatterns counts={stats.conflictPatternCounts} />
-            <ArgumentStockMarket
-              rows={stockMarket(stats.issueSharePerPeriod.current, stats.issueSharePerPeriod.previous)}
-              winning={whosWinning(stats.results)}
-              names={{ a: nameA, b: nameB }}
-            />
+            <PatternTally patterns={stats.conflictPatternCounts} />
           </div>
 
           <section className="flex flex-col gap-3">
