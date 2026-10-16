@@ -3,10 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArgumentStockMarket } from "@/components/court/charts/argument-stock-market";
 import { ConflictPatterns } from "@/components/court/charts/conflict-patterns";
-import { EmotionCounts } from "@/components/court/charts/emotion-counts";
-import { IntensityOverTime } from "@/components/court/charts/intensity-over-time";
-import { ResponsibilityDistribution } from "@/components/court/charts/responsibility-distribution";
-import { Badge } from "@/components/ui/badge";
+import { BlameDistribution } from "@/components/court/charts/blame-distribution";
+import { PeaceCalendar, type ConflictDay } from "@/components/court/charts/peace-calendar";
+import { PastCases, type PastCaseRow } from "@/components/court/past-cases";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Page } from "@/components/ui/page";
@@ -47,16 +46,44 @@ export default async function HistoryPage() {
     );
   }
 
-  const [{ data: openCases }, cases] = await Promise.all([
-    db.from("cases").select("id, title, stage").neq("stage", "CLOSED"),
+  const [{ data: openCases }, { data: coupleRow }, cases] = await Promise.all([
+    db.from("cases").select("id, title, stage, created_at").neq("stage", "CLOSED"),
+    db.from("couples").select("created_at").eq("id", couple.coupleId).maybeSingle(),
     getCoupleHistory(db, couple.coupleId),
   ]);
   const openCase = openCases?.[0] ?? null;
 
   const stats = await getCoupleStats(db, couple.coupleId, cases);
-  const dateFormat = new Intl.DateTimeFormat(locale);
   const nameA = couple.me.role === "partner_a" ? couple.me.name : couple.partner.name;
   const nameB = couple.me.role === "partner_b" ? couple.me.name : couple.partner.name;
+
+  // Every filed case marks a conflict day, including the one still in progress.
+  const conflictDays: ConflictDay[] = [
+    ...cases.map((c) => ({ filedAt: c.filedAt, title: c.title, href: `/cases/${c.id}/report` })),
+    ...(openCase ? [{ filedAt: openCase.created_at as string, title: openCase.title as string, href: `/cases/${openCase.id}` }] : []),
+  ];
+  const courtOpenedAt = (coupleRow?.created_at as string | undefined) ?? cases[cases.length - 1]?.filedAt ?? new Date().toISOString();
+
+  const moreResponsible = {
+    a: stats.results.filter((r) => r === "partner_a").length,
+    b: stats.results.filter((r) => r === "partner_b").length,
+  };
+
+  const monthFormat = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
+  const dayFormat = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
+  const pastCases: PastCaseRow[] = cases.map((c) => {
+    const closed = new Date(c.closedAt);
+    const issue = c.primaryIssue ? optionLabel(tAll, "issues", c.primaryIssue) : null;
+    return {
+      id: c.id,
+      href: `/cases/${c.id}/report`,
+      title: c.title,
+      month: monthFormat.format(closed),
+      meta: [dayFormat.format(closed), issue].filter(Boolean).join(" · "),
+      split: { a: c.finalA, b: c.finalB },
+      splitLabel: `${nameA} ${c.finalA}%, ${nameB} ${c.finalB}%`,
+    };
+  });
 
   return (
     <Page className="gap-6 md:max-w-3xl">
@@ -109,13 +136,8 @@ export default async function HistoryPage() {
 
           <div className="flex flex-col gap-6">
             <h2 className="text-label-docket uppercase text-walnut">{t("dashboardHeading")}</h2>
-            <ResponsibilityDistribution
-              points={stats.responsibilityOverTime}
-              names={{ a: nameA, b: nameB }}
-              avg={stats.avgResponsibility}
-            />
-            <IntensityOverTime points={stats.intensityOverTime} />
-            <EmotionCounts counts={stats.emotionCounts} />
+            <PeaceCalendar conflicts={conflictDays} courtOpenedAt={courtOpenedAt} />
+            <BlameDistribution names={{ a: nameA, b: nameB }} avg={stats.avgResponsibility} moreResponsible={moreResponsible} />
             <ConflictPatterns counts={stats.conflictPatternCounts} />
             <ArgumentStockMarket
               rows={stockMarket(stats.issueSharePerPeriod.current, stats.issueSharePerPeriod.previous)}
@@ -126,27 +148,7 @@ export default async function HistoryPage() {
 
           <section className="flex flex-col gap-3">
             <h2 className="text-label-docket uppercase text-walnut">{t("caseListHeading")}</h2>
-            <ul className="flex flex-col gap-3">
-              {cases.map((c) => (
-                <li key={c.id}>
-                  <Link
-                    href={`/cases/${c.id}/report`}
-                    className="flex flex-col gap-2 rounded-card border border-hairline bg-surface p-4 shadow-card focus-visible:outline-2 focus-visible:outline-espresso md:flex-row md:items-center md:justify-between"
-                  >
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <span className="truncate text-body-md font-medium text-espresso">{c.title}</span>
-                      <span className="text-body-sm text-walnut">{dateFormat.format(new Date(c.closedAt))}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {c.primaryIssue && <Badge>{optionLabel(tAll, "issues", c.primaryIssue)}</Badge>}
-                      <span className="whitespace-nowrap text-body-sm text-espresso">
-                        {c.finalA}% / {c.finalB}%
-                      </span>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <PastCases rows={pastCases} />
           </section>
         </>
       )}

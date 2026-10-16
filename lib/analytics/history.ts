@@ -8,6 +8,7 @@ type Db = Awaited<ReturnType<typeof createClient>>;
 export type HistoryCase = {
   id: string;
   title: string;
+  filedAt: string;
   closedAt: string;
   finalA: number;
   finalB: number;
@@ -46,6 +47,7 @@ export async function getCoupleHistory(db: Db, coupleId: string): Promise<Histor
     .map((row) => ({
       id: row.id,
       title: row.title,
+      filedAt: row.created_at,
       closedAt: row.closed_at ?? row.created_at,
       finalA: Number(row.verdicts.final_responsibility_a),
       finalB: Number(row.verdicts.final_responsibility_b),
