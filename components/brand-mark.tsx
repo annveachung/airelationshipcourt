@@ -1,4 +1,4 @@
-// The brand mark beside "AI Relationship Court" in the header: a 10×8 pixel heart split down the
+// The brand mark beside "Pairadox" in the header: a 10×8 pixel heart split down the
 // middle, espresso on one side and rose on the other. Two partners, two sides of the story, one
 // heart. Drawn at 2px per pixel; decorative (the brand name next to it carries the meaning).
 
