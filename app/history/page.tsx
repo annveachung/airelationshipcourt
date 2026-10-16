@@ -16,7 +16,8 @@ import { getCoupleStats } from "@/lib/analytics/stats";
 import { stockMarket, whosWinning } from "@/lib/analytics/stock-market";
 import { getMyCouple } from "@/lib/couples";
 import { optionLabel } from "@/lib/i18n-labels";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 const THIN_DATA = 3;
 
@@ -27,10 +28,8 @@ export default async function HistoryPage() {
   const tAll = await getTranslations();
   const locale = await getLocale();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const couple = await getMyCouple(user.id);
@@ -49,12 +48,12 @@ export default async function HistoryPage() {
   }
 
   const [{ data: openCases }, cases] = await Promise.all([
-    supabase.from("cases").select("id, title, stage").neq("stage", "CLOSED"),
-    getCoupleHistory(supabase, couple.coupleId),
+    db.from("cases").select("id, title, stage").neq("stage", "CLOSED"),
+    getCoupleHistory(db, couple.coupleId),
   ]);
   const openCase = openCases?.[0] ?? null;
 
-  const stats = await getCoupleStats(supabase, couple.coupleId, cases);
+  const stats = await getCoupleStats(db, couple.coupleId, cases);
   const dateFormat = new Intl.DateTimeFormat(locale);
   const nameA = couple.me.role === "partner_a" ? couple.me.name : couple.partner.name;
   const nameB = couple.me.role === "partner_b" ? couple.me.name : couple.partner.name;

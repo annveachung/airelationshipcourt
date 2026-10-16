@@ -2,7 +2,7 @@
 // JSON extraction, schema validation and a repair-retry ladder.
 import "server-only";
 import type { ZodType } from "zod";
-import { createServiceClient } from "@/lib/supabase/service";
+import { createServiceClient } from "@/lib/db/service";
 import { AI_MODEL, createAiClient, withoutThinking } from "./client";
 import { extractJson } from "./json";
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { toCourtStatus, type CourtStatusRow } from "@/lib/cases/court-status";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -12,16 +13,14 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/cases/[case
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   // The database function checks that the caller belongs to this case's couple.
-  const { data } = await supabase.rpc("court_status", { the_case: caseId });
+  const { data } = await db.rpc("court_status", { the_case: caseId });
   const row = (data as CourtStatusRow[] | null)?.[0];
   if (!row) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });

@@ -15,7 +15,8 @@ import { loadVerdictBundle } from "@/lib/cases/verdict-data";
 import type { Locale } from "@/lib/i18n";
 import { getMyCouple } from "@/lib/couples";
 import { toAiErrorKey, toCaseErrorKey } from "@/lib/error-keys";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -27,14 +28,12 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
   const { caseId } = await params;
   if (!UUID.test(caseId)) notFound();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   // Row Level Security only returns cases belonging to my couple.
-  const { data: theCase } = await supabase
+  const { data: theCase } = await db
     .from("cases")
     .select("id, title, context, stage, last_error")
     .eq("id", caseId)
@@ -46,7 +45,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
   const couple = await getMyCouple(user.id);
   if (couple.kind !== "active") notFound();
 
-  const { data } = await supabase.rpc("court_status", { the_case: caseId });
+  const { data } = await db.rpc("court_status", { the_case: caseId });
   const row = (data as CourtStatusRow[] | null)?.[0];
   if (!row) notFound();
   const status = toCourtStatus(row);
@@ -104,7 +103,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
       </Card>
     );
   } else if (stage === "FOLLOW_UP" && !myFollowedUp) {
-    const { data: questions } = await supabase
+    const { data: questions } = await db
       .from("follow_up_questions")
       .select("id, question_text, format, options, position")
       .eq("case_id", caseId)
@@ -160,7 +159,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
 
   if (afterVerdict) {
     const locale = (await getLocale()) as Locale;
-    const bundle = await loadVerdictBundle(supabase, caseId, locale);
+    const bundle = await loadVerdictBundle(db, caseId, locale);
     const userIds = {
       a: iAmA ? couple.me.userId : couple.partner.userId,
       b: iAmA ? couple.partner.userId : couple.me.userId,

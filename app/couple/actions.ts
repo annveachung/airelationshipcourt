@@ -3,18 +3,19 @@
 import { redirect } from "next/navigation";
 import { errorKey, INVITE_CODE_PATTERN } from "@/lib/couples";
 import { notifyPartner } from "@/lib/notifications";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 export async function createCouple() {
-  const supabase = await createClient();
+  const db = await createClient();
 
-  const { error } = await supabase.rpc("create_couple");
+  const { error } = await db.rpc("create_couple");
   if (error) {
     console.error("create_couple failed:", error.message);
     redirect(`/couple/new?error=${errorKey(error.message)}`);
   }
 
-  const { error: inviteError } = await supabase.rpc("create_invite");
+  const { error: inviteError } = await db.rpc("create_invite");
   if (inviteError) {
     console.error("create_invite failed:", inviteError.message);
     redirect(`/couple/invite?error=${errorKey(inviteError.message)}`);
@@ -24,8 +25,8 @@ export async function createCouple() {
 }
 
 export async function refreshInvite() {
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("create_invite");
+  const db = await createClient();
+  const { error } = await db.rpc("create_invite");
   if (error) {
     console.error("create_invite failed:", error.message);
     redirect(`/couple/invite?error=${errorKey(error.message)}`);
@@ -39,11 +40,9 @@ export async function acceptInvite(formData: FormData) {
     redirect("/");
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { error } = await supabase.rpc("accept_invite", { invite_code: code });
+  const db = await createClient();
+  const user = await getUser();
+  const { error } = await db.rpc("accept_invite", { invite_code: code });
   if (error) {
     console.error("accept_invite failed:", error.message);
     redirect(`/join/${code}?error=${errorKey(error.message)}`);

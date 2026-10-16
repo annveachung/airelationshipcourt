@@ -7,7 +7,8 @@ import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getMyCouple, INVITE_CODE_PATTERN } from "@/lib/couples";
 import { toInviteErrorKey } from "@/lib/error-keys";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 export default async function JoinPage({ params, searchParams }: PageProps<"/join/[code]">) {
   const t = await getTranslations("join");
@@ -15,17 +16,15 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
   const { code } = await params;
   const errorKey = toInviteErrorKey((await searchParams).error);
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(`/join/${code}`)}`);
 
   // Validate the shape before touching the database.
   const valid = INVITE_CODE_PATTERN.test(code);
   let inviter: string | null = null;
   if (valid) {
-    const { data } = await supabase.rpc("invite_preview", { invite_code: code });
+    const { data } = await db.rpc("invite_preview", { invite_code: code });
     inviter = (data as { inviter_name: string }[] | null)?.[0]?.inviter_name ?? null;
   }
 

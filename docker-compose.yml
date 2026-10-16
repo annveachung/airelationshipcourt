@@ -1,0 +1,33 @@
+# Local database for development, set up the same way as the production server:
+# Postgres 16 + PostgREST. Start with `docker compose up -d`, then `npm run db:migrate`.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "127.0.0.1:54322:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/roles.sql:/docker-entrypoint-initdb.d/10-roles.sql:ro
+      - ./db/dev-database.sql:/docker-entrypoint-initdb.d/20-dev-database.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 2s
+      retries: 30
+
+  rest:
+    image: postgrest/postgrest:v16.4
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://pairadox_authenticator:authenticator@db:5432/pairadox
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: local-development-only-jwt-secret-0123456789
+    ports:
+      - "127.0.0.1:54321:3000"
+
+volumes:
+  pgdata:

@@ -6,7 +6,7 @@ import { reportTextsSchema, verdictTextsSchema, type ReportTexts, type VerdictTe
 import type { PanelRole, PanelScores } from "@/lib/cases/aggregate";
 import type { VerdictCharges } from "@/lib/cases/charges";
 import type { Locale } from "@/lib/i18n";
-import type { createClient } from "@/lib/supabase/server";
+import type { createClient } from "@/lib/db/server";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 

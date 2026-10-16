@@ -1,7 +1,7 @@
 // SERVER. Reads go through the caller's normal (Row Level Security) client — every case here
 // is already CLOSED, so both partners can read it; there is no reason to use the secret key.
 import { normalizeIssue } from "@/lib/cases/taxonomy";
-import type { createClient } from "@/lib/supabase/server";
+import type { createClient } from "@/lib/db/server";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 

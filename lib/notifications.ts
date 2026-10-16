@@ -5,7 +5,7 @@
 // so it can be shown in each person's language and chosen tone.
 import "server-only";
 import type { NotificationType } from "@/lib/notification-types";
-import { createServiceClient } from "@/lib/supabase/service";
+import { createServiceClient } from "@/lib/db/service";
 
 type NotifyInput = {
   userId: string;
