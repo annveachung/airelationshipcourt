@@ -1,5 +1,5 @@
 import "server-only";
-import { createServiceClient } from "@/lib/supabase/service";
+import { createServiceClient } from "@/lib/db/service";
 import type { CaseStage } from "./stages";
 
 // Each stage may only move to the next one. There is no going back.

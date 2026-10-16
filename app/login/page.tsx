@@ -12,7 +12,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const t = await getTranslations("login");
   const params = await searchParams;
   const next = safeNext(typeof params.next === "string" ? params.next : null);
-  const failed = params.error === "signin_failed";
+  const failed = typeof params.error === "string";
 
   return (
     <div>

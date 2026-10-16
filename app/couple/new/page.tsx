@@ -7,15 +7,12 @@ import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getMyCouple } from "@/lib/couples";
 import { toInviteErrorKey } from "@/lib/error-keys";
-import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/session";
 
 export default async function NewCouplePage({ searchParams }: PageProps<"/couple/new">) {
   const t = await getTranslations("couple");
   const tErr = await getTranslations("inviteErrors");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   // Already in a couple? Nothing to create.

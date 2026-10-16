@@ -8,22 +8,21 @@ import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getMyCouple, inviteLink } from "@/lib/couples";
 import { toInviteErrorKey } from "@/lib/error-keys";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 export default async function InvitePage({ searchParams }: PageProps<"/couple/invite">) {
   const t = await getTranslations("couple");
   const tErr = await getTranslations("inviteErrors");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const couple = await getMyCouple(user.id);
   if (couple.kind === "none") redirect("/couple/new");
   if (couple.kind === "active") redirect("/");
 
-  const { data: code } = await supabase.rpc("my_open_invite");
+  const { data: code } = await db.rpc("my_open_invite");
   const link = typeof code === "string" ? await inviteLink(code) : null;
   const errorKey = toInviteErrorKey((await searchParams).error);
 

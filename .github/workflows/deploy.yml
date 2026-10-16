@@ -1,0 +1,99 @@
+name: Deploy to production
+
+# Builds the Next.js app on the GitHub runner (x86_64, matching the Oracle AMD instance it shares
+# with annvea.com), assembles a standalone bundle, rsyncs it to the server, then runs database
+# migrations and reloads the process under pm2. The 1 GB server never builds.
+# One-time server setup: deploy/server-setup.sh. Site: https://pairadox.achtlabs.com
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {} # manual trigger from the Actions tab
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  APP_DIR: /var/www/pairadox
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build # emits .next/standalone
+
+      - name: Assemble deploy bundle
+        run: |
+          set -euo pipefail
+          rm -rf deploy-bundle && mkdir -p deploy-bundle
+          # Standalone server + traced node_modules + package.json + server.js
+          cp -r .next/standalone/. deploy-bundle/
+          # Static assets and public/ are NOT included in standalone — add them. Copy the
+          # *contents* of public/ so it doesn't nest as public/public.
+          mkdir -p deploy-bundle/.next deploy-bundle/public
+          cp -r .next/static deploy-bundle/.next/static
+          [ -d public ] && cp -r public/. deploy-bundle/public/
+          # Migrations + runner so the server can bring the database up to date
+          mkdir -p deploy-bundle/scripts
+          cp -r db deploy-bundle/db
+          cp scripts/migrate.sh deploy-bundle/scripts/migrate.sh
+
+      - name: Setup SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rsync bundle to server
+        run: |
+          set -euo pipefail
+          rsync -az --delete \
+            --exclude='.env' \
+            -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }}" \
+            deploy-bundle/ \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.APP_DIR }}/"
+
+      - name: Migrate & reload on server
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            'bash -s' <<'REMOTE'
+          set -euo pipefail
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+          cd /var/www/pairadox
+
+          # Load runtime env (DATABASE_URL, POSTGREST_*, AUTH_*, PORT, ...) into this shell
+          set -a; . ./.env; set +a
+
+          echo "==> Applying database migrations"
+          bash scripts/migrate.sh
+
+          echo "==> Starting/reloading app"
+          # First deploy: start; subsequent deploys: zero-downtime reload
+          pm2 reload pairadox --update-env 2>/dev/null || \
+            pm2 start server.js --name pairadox --update-env
+          pm2 save
+
+          pm2 status pairadox
+          REMOTE

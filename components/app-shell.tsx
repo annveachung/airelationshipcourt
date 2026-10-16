@@ -7,7 +7,7 @@ import { LanguageMenu } from "@/components/language-menu";
 import { NotificationBell } from "@/components/notification-bell";
 import { NotificationsProvider } from "@/components/notifications-provider";
 import { SoundToggle } from "@/components/sound-toggle";
-import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/session";
 import { TabBar } from "./tab-bar";
 import { TopNav } from "./top-nav";
 
@@ -17,13 +17,9 @@ const container = "mx-auto w-full max-w-[430px] px-5 md:max-w-5xl md:px-8";
 
 export async function AppShell({ children }: { children: ReactNode }) {
   const t = await getTranslations("shell");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const name: string =
-    user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? user?.email ?? "";
-  const avatarUrl: string | null = user?.user_metadata?.avatar_url ?? null;
+  const user = await getUser();
+  const name = user?.name ?? user?.email ?? "";
+  const avatarUrl = user?.image ?? null;
 
   const shell = (
     <div className="flex min-h-dvh flex-col">

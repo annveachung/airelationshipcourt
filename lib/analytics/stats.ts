@@ -4,7 +4,7 @@
 import { intensityBand, type IntensityBand } from "@/lib/cases/intensity";
 import { normalizeIssue, type IssueCategory } from "@/lib/cases/taxonomy";
 import type { PeriodBucket } from "@/lib/analytics/stock-market";
-import type { createClient } from "@/lib/supabase/server";
+import type { createClient } from "@/lib/db/server";
 import type { HistoryCase } from "./history";
 
 type Db = Awaited<ReturnType<typeof createClient>>;

@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Relationship Court
 
-## Getting Started
+Live at **[pairadox.achtlabs.com](https://pairadox.achtlabs.com)**.
 
-First, run the development server:
+Built with Next.js, Auth.js (Google sign-in) and PostgreSQL. The app reads and writes through
+[PostgREST](https://postgrest.org), so Row Level Security and the SQL functions in
+`db/migrations/` decide what each signed-in person can see and do.
+
+## Development
 
 ```bash
+npm install
+cp .env.example .env.local   # fill in AUTH_*, DASHSCOPE_*
+docker compose up -d         # Postgres 16 + PostgREST on 127.0.0.1:54322 / :54321
+npm run db:migrate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Google sign-in locally needs `http://localhost:3000/api/auth/callback/google` on the OAuth
+client's Authorized redirect URIs.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Every push to `main` deploys automatically via GitHub Actions
+(`.github/workflows/deploy.yml`): the app is built on the runner, synced to the server
+(shared with annvea.com), migrated, and reloaded under pm2 behind nginx.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- One-time server setup (safe to re-run; also fetches the HTTPS certificate):
+  `deploy/server-setup.sh` — see the comment at its top for the command.
+- Change a server setting: `deploy/set-env.sh KEY`.
+- One-time copy of the old Supabase data: `deploy/copy-data.sh`.

@@ -3,7 +3,8 @@ import { aiConfigured } from "@/lib/ai/client";
 import { ensureTranslation } from "@/lib/cases/pipeline";
 import { CASE_STAGES, type CaseStage } from "@/lib/cases/stages";
 import { isLocale } from "@/lib/i18n";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 export const maxDuration = 60;
 export const runtime = "nodejs";
@@ -16,13 +17,11 @@ export async function POST(request: Request, ctx: RouteContext<"/api/cases/[case
   const { caseId } = await ctx.params;
   if (!UUID.test(caseId)) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
+  const { data } = await db.rpc("case_submission_status", { the_case: caseId });
   const row = (data as { stage: CaseStage }[] | null)?.[0];
   if (!row) return NextResponse.json({ error: "not_found" }, { status: 404 });
 

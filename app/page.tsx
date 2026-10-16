@@ -10,7 +10,8 @@ import { caseWinner, scoreboard, type PlayerScore } from "@/lib/analytics/scoreb
 import type { CaseStage } from "@/lib/cases/stages";
 import { cn } from "@/lib/cn";
 import { getMyCouple, type CoupleState, type Partner } from "@/lib/couples";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 // Tiles show first names only: full Google names run long, and when a profile has no name the
 // email fallback shows just the part before "@".
@@ -89,10 +90,8 @@ async function PlayerTile({ number, role, player, isMe, score }: {
 
 export default async function Home() {
   const t = await getTranslations("docket");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const couple = await getMyCouple(user.id);
@@ -101,8 +100,8 @@ export default async function Home() {
   const [{ data: cases }, history] =
     couple.kind === "active"
       ? await Promise.all([
-          supabase.from("cases").select("id, stage").order("created_at", { ascending: false }),
-          getCoupleHistory(supabase, couple.coupleId),
+          db.from("cases").select("id, stage").order("created_at", { ascending: false }),
+          getCoupleHistory(db, couple.coupleId),
         ])
       : [{ data: null }, []];
   const scores = couple.kind === "active" ? scoreboard(history.map(caseWinner)) : null;

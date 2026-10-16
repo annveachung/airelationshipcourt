@@ -8,15 +8,14 @@ import { Page } from "@/components/ui/page";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { toCaseErrorKey } from "@/lib/error-keys";
 import { getMyCouple } from "@/lib/couples";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 export default async function NewCasePage({ searchParams }: PageProps<"/cases/new">) {
   const t = await getTranslations("newCase");
   const tErr = await getTranslations("caseErrors");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const couple = await getMyCouple(user.id);
@@ -37,7 +36,7 @@ export default async function NewCasePage({ searchParams }: PageProps<"/cases/ne
   }
 
   // One open case at a time.
-  const { data: open } = await supabase
+  const { data: open } = await db
     .from("cases")
     .select("id, title")
     .neq("stage", "CLOSED")

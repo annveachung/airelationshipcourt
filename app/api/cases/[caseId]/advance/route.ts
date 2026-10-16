@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { aiConfigured } from "@/lib/ai/client";
 import { runAnalysisStep, runPanelStep } from "@/lib/cases/pipeline";
 import { setCaseError } from "@/lib/cases/state-machine";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 // Analysis, the three panel members and the verdict can take a while on a slow model.
 export const maxDuration = 60;
@@ -17,13 +18,11 @@ export async function POST(request: Request, ctx: RouteContext<"/api/cases/[case
   if (!UUID.test(caseId)) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   // Who is asking? Only members of this case's couple may drive it.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
+  const { data } = await db.rpc("case_submission_status", { the_case: caseId });
   const row = (data as { stage: string; failed: boolean }[] | null)?.[0];
   if (!row) return NextResponse.json({ error: "not_found" }, { status: 404 });
 

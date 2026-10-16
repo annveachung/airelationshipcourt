@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { INVITE_ERROR_KEYS } from "@/lib/error-keys";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
 
 export type Partner = {
   userId: string;
@@ -22,9 +22,9 @@ type MemberRow = {
 };
 
 export async function getMyCouple(userId: string): Promise<CoupleState> {
-  const supabase = await createClient();
+  const db = await createClient();
 
-  const { data: mine } = await supabase
+  const { data: mine } = await db
     .from("couple_members")
     .select("couple_id")
     .eq("user_id", userId)
@@ -32,7 +32,7 @@ export async function getMyCouple(userId: string): Promise<CoupleState> {
   if (!mine) return { kind: "none" };
 
   // Row Level Security lets us read both members of our own couple.
-  const { data } = await supabase
+  const { data } = await db
     .from("couple_members")
     .select("user_id, role, couple_id, profiles(display_name, avatar_url)")
     .eq("couple_id", mine.couple_id)

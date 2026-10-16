@@ -14,7 +14,8 @@ import { CASE_STAGES, type CaseStage } from "@/lib/cases/stages";
 import { loadVerdictBundle } from "@/lib/cases/verdict-data";
 import { getMyCouple } from "@/lib/couples";
 import type { Locale } from "@/lib/i18n";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -28,13 +29,11 @@ export default async function ReportPage({ params }: PageProps<"/cases/[caseId]/
   const { caseId } = await params;
   if (!UUID.test(caseId)) notFound();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
 
-  const { data: theCase } = await supabase
+  const { data: theCase } = await db
     .from("cases")
     .select("id, title, stage, closed_reason, closed_at")
     .eq("id", caseId)
@@ -50,7 +49,7 @@ export default async function ReportPage({ params }: PageProps<"/cases/[caseId]/
   if (couple.kind !== "active") notFound();
 
   const locale = (await getLocale()) as Locale;
-  const bundle = await loadVerdictBundle(supabase, caseId, locale);
+  const bundle = await loadVerdictBundle(db, caseId, locale);
   const iAmA = couple.me.role === "partner_a";
   const names = {
     a: iAmA ? couple.me.name : couple.partner.name,

@@ -27,7 +27,7 @@ import { notifyBoth } from "@/lib/notifications";
 import { aggregate, PANEL_ROLES, type PanelRole } from "./aggregate";
 import { CHARGE_IDS } from "./charges";
 import { isLocale, type Locale } from "@/lib/i18n";
-import { createServiceClient } from "@/lib/supabase/service";
+import { createServiceClient } from "@/lib/db/service";
 import { setCaseError, transition } from "./state-machine";
 
 // "continue" = more work remains; the poller will call again.

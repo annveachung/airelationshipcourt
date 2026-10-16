@@ -7,8 +7,8 @@ const origin = () => window.location.origin;
 const serverOrigin = () => "";
 
 // DEVELOPMENT ONLY (never shown in production builds, so not translated).
-// When you open the dev server from another device, Supabase only signs you in if this exact
-// address is on its "Redirect URLs" list. This shows what to add.
+// When you open the dev server from another device, Google sign-in can't come back to it: an
+// OAuth client only accepts localhost or a public domain as a redirect address. This says so.
 export function DevOriginHint() {
   const here = useSyncExternalStore(subscribe, origin, serverOrigin);
   if (process.env.NODE_ENV !== "development" || !here) return null;
@@ -19,10 +19,10 @@ export function DevOriginHint() {
     <div className="rounded-card border border-rose-deep/40 bg-rose/20 p-4 text-body-sm text-ink">
       <p className="font-medium text-espresso">Developer tip</p>
       <p className="mt-1">
-        This device is using <code className="break-all font-mono">{here}</code>. For Google sign-in to come back
-        here, add this line to Supabase → Authentication → URL Configuration → Redirect URLs, then Save:
+        This device is using <code className="break-all font-mono">{here}</code>. Google sign-in only
+        returns to <code className="font-mono">localhost</code> or a public domain, so sign in on the computer running
+        the dev server, or test phones on the deployed site.
       </p>
-      <p className="mt-2 break-all rounded bg-surface px-2 py-1 font-mono text-body-sm">{`${here}/**`}</p>
     </div>
   );
 }

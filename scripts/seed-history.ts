@@ -1,13 +1,13 @@
 // DEV ONLY. Inserts ~8 realistic, CLEARLY FAKE closed cases (titled "[SEED] …") for one
 // couple, spread over the last ~60 days, so Phase 8's charts have something to show. Uses the
-// secret key directly — this is a standalone script, never imported by the app.
+// service role directly — this is a standalone script, never imported by the app.
 //
 // Usage:  npx tsx scripts/seed-history.ts <coupleId>
 // Clear:  npx tsx scripts/seed-history.ts --clear <coupleId>
 //
 // Never run this against a shared or production project.
 import { config } from "dotenv";
-import { createClient } from "@supabase/supabase-js";
+import { postgrest } from "../lib/db/postgrest";
 import { aggregate, type PanelScores } from "../lib/cases/aggregate";
 import { intensityBand } from "../lib/cases/intensity";
 
@@ -17,12 +17,7 @@ if (process.env.NODE_ENV === "production") {
   throw new Error("seed-history.ts must not run in production.");
 }
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const secretKey = process.env.SUPABASE_SECRET_KEY;
-if (!url || !secretKey) {
-  throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY in .env.local.");
-}
-const db = createClient(url, secretKey, { auth: { persistSession: false } });
+const db = postgrest("service_role");
 
 const SEED_PREFIX = "[SEED] ";
 const DAY = 24 * 60 * 60 * 1000;

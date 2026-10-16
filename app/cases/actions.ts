@@ -9,7 +9,8 @@ import { normalizeClauses } from "@/lib/cases/treaty";
 import { notifyBoth, notifyPartner } from "@/lib/notifications";
 import { caseSchema, testimonySchema } from "@/lib/cases/testimony";
 import type { Locale } from "@/lib/i18n";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/session";
 
 function optional(value: FormDataEntryValue | null) {
   const text = String(value ?? "").trim();
@@ -23,8 +24,8 @@ export async function createCase(formData: FormData) {
   // The court names the case from the description (falls back to a plain title if the AI is down).
   const title = await generateCaseTitle(parsed.data.context, (await getLocale()) as Locale);
 
-  const supabase = await createClient();
-  const { data: caseId, error } = await supabase.rpc("create_case", {
+  const db = await createClient();
+  const { data: caseId, error } = await db.rpc("create_case", {
     case_title: title,
     case_context: parsed.data.context,
   });
@@ -39,9 +40,7 @@ export async function createCase(formData: FormData) {
     redirect(`/cases/new?error=${key}`);
   }
 
-  const {
-    data: { user: filer },
-  } = await supabase.auth.getUser();
+  const filer = await getUser();
   if (filer) await notifyPartner(filer.id, caseId, "case_filed");
 
   revalidatePath("/");
@@ -68,14 +67,12 @@ export async function submitTestimony(formData: FormData) {
   const t = parsed.data;
   const caseUrl = `/cases/${t.caseId}`;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   // Row Level Security checks: it's my row, I'm in this couple, and the case is in TESTIMONY.
-  const { error } = await supabase.from("testimonies").insert({
+  const { error } = await db.from("testimonies").insert({
     case_id: t.caseId,
     user_id: user.id,
     what_happened: t.whatHappened,
@@ -99,7 +96,7 @@ export async function submitTestimony(formData: FormData) {
 
   // If both partners have now testified, move the case on. The compare-and-swap
   // inside transition() makes this safe if both submit at the same moment.
-  const { data: status } = await supabase.rpc("case_submission_status", { the_case: t.caseId });
+  const { data: status } = await db.rpc("case_submission_status", { the_case: t.caseId });
   const row = (status as { a_submitted: boolean; b_submitted: boolean }[] | null)?.[0];
   if (row?.a_submitted && row?.b_submitted) {
     await transition(t.caseId, "TESTIMONY", "ANALYSIS");
@@ -117,14 +114,12 @@ export async function submitFollowUp(formData: FormData) {
   if (!/^[0-9a-f-]{36}$/i.test(caseId)) redirect("/");
   const caseUrl = `/cases/${caseId}`;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   // Row Level Security only lets me read MY questions.
-  const { data: questions } = await supabase
+  const { data: questions } = await db
     .from("follow_up_questions")
     .select("id, format, options")
     .eq("case_id", caseId)
@@ -150,7 +145,7 @@ export async function submitFollowUp(formData: FormData) {
   }
 
   // One transaction in the database: the submission marker plus every answer.
-  const { error } = await supabase.rpc("submit_follow_up", { the_case: caseId, answers });
+  const { error } = await db.rpc("submit_follow_up", { the_case: caseId, answers });
   if (error) {
     console.error("submit_follow_up failed:", error.message, "case", caseId, "user", user.id);
     const key = error.message.includes("already_answered")
@@ -164,7 +159,7 @@ export async function submitFollowUp(formData: FormData) {
   await notifyPartner(user.id, caseId, "partner_followed_up");
 
   // If both partners have now answered, hand the case to the panel (compare-and-swap is race-safe).
-  const { data: status } = await supabase.rpc("case_submission_status", { the_case: caseId });
+  const { data: status } = await db.rpc("case_submission_status", { the_case: caseId });
   const row = (status as { a_followed_up: boolean; b_followed_up: boolean }[] | null)?.[0];
   if (row?.a_followed_up && row?.b_followed_up) {
     await transition(caseId, "FOLLOW_UP", "PANEL_JUDGEMENT");
@@ -182,18 +177,16 @@ export async function submitFollowUp(formData: FormData) {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function memberStatus(caseId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const db = await createClient();
+  const user = await getUser();
   if (!user) redirect("/login");
-  const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
+  const { data } = await db.rpc("case_submission_status", { the_case: caseId });
   const row = (
     data as
       | { stage: string; a_signed: boolean; b_signed: boolean; report_ready: boolean }[]
       | null
   )?.[0];
-  return { supabase, row, user };
+  return { db, row, user };
 }
 
 /** VERDICT -> RECOMMENDATIONS, then RECOMMENDATIONS -> REPORT (once the report is written). */
@@ -223,10 +216,10 @@ export async function signTreaty(formData: FormData) {
   if (!UUID_RE.test(caseId)) redirect("/");
   const caseUrl = `/cases/${caseId}`;
 
-  const { supabase, user } = await memberStatus(caseId);
+  const { db, user } = await memberStatus(caseId);
   const clauses = normalizeClauses(formData.getAll("clauses"));
 
-  const { error } = await supabase.rpc("sign_treaty", { the_case: caseId, agreed: clauses });
+  const { error } = await db.rpc("sign_treaty", { the_case: caseId, agreed: clauses });
   if (error) {
     console.error("sign_treaty failed:", error.message, "case", caseId);
     const key = error.message.includes("already_signed")
@@ -240,7 +233,7 @@ export async function signTreaty(formData: FormData) {
   await notifyPartner(user.id, caseId, "partner_signed");
 
   // Both signed? Close the case (compare-and-swap: safe if both sign at the same moment).
-  const { data } = await supabase.rpc("case_submission_status", { the_case: caseId });
+  const { data } = await db.rpc("case_submission_status", { the_case: caseId });
   const row = (data as { a_signed: boolean; b_signed: boolean }[] | null)?.[0];
   if (row?.a_signed && row?.b_signed) {
     if (await transition(caseId, "REPORT", "CLOSED", { closedReason: "treaty" })) {
