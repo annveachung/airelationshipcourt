@@ -530,13 +530,13 @@
     "blameBody": "The average share of responsibility across all closed cases.",
     "moreResponsibleCounts": "Found more responsible: {a} {aCount} · {b} {bCount}",
     "patternsHeading": "Recurring conflict patterns",
-    "patternsBody": "The patterns the court's analysis has spotted most often.",
-    "stockMarketHeading": "The Argument Stock Market",
-    "stockMarketBody": "Which issues have been trending in your last 30 days versus the 30 days before. Not financial advice.",
-    "notEnoughForChange": "Not enough recent cases yet to show a trend.",
-    "scoreboardHeading": "Who's winning",
-    "scoreboard": "{a} {aCount} — {bCount} {b}",
-    "scoreboardTie": "{ties, plural, =0 {} one {, with # tie} other {, with # ties}}",
-    "noData": "Not enough data for this chart yet."
+    "patternsBody": "Behaviour patterns the court spotted in your cases. Each dot is one case; tap a dot to open it.",
+    "patternCases": "{count, plural, one {came up in # case} other {came up in # cases}}",
+    "patternsNoneRecurring": "Nothing has come up in more than one case yet. That is a good sign.",
+    "patternsRecurringHeading": "Keeps coming back",
+    "patternsOnceHeading": "Came up once",
+    "patternsShowMore": "Show {count} more",
+    "patternsShowFewer": "Show fewer",
+    "patternsLegendDot": "One case"
   }
 }

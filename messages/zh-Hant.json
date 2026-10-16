@@ -530,13 +530,13 @@
     "blameBody": "所有已結案件的平均責任比例。",
     "moreResponsibleCounts": "被判較有責任：{a} {aCount} 次 · {b} {bCount} 次",
     "patternsHeading": "反覆出現的衝突模式",
-    "patternsBody": "法庭分析中最常出現的模式。",
-    "stockMarketHeading": "爭執證券交易所",
-    "stockMarketBody": "過去 30 天與再往前 30 天相比，哪些問題正在升溫。純屬娛樂，非財務建議。",
-    "notEnoughForChange": "近期案件數量還不足以顯示趨勢。",
-    "scoreboardHeading": "誰比較「贏」",
-    "scoreboard": "{a} {aCount} 比 {bCount} {b}",
-    "scoreboardTie": "{ties, plural, =0 {} other {，平手 # 次}}",
-    "noData": "這張圖表目前資料還不夠。"
+    "patternsBody": "法庭在你們案件中發現的行為模式。每個圓點代表一個案件，點一下即可開啟。",
+    "patternCases": "{count, plural, other {出現在 # 個案件中}}",
+    "patternsNoneRecurring": "目前還沒有模式在超過一個案件中出現，這是個好跡象。",
+    "patternsRecurringHeading": "反覆出現",
+    "patternsOnceHeading": "只出現過一次",
+    "patternsShowMore": "再顯示 {count} 個",
+    "patternsShowFewer": "收合",
+    "patternsLegendDot": "一個案件"
   }
 }
