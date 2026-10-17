@@ -2,7 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BlameDistribution } from "@/components/court/charts/blame-distribution";
-import { PatternTally } from "@/components/court/charts/pattern-tally";
+import { ArgumentLoop } from "@/components/court/charts/argument-loop";
 import { PeaceCalendar, type ConflictDay } from "@/components/court/charts/peace-calendar";
 import { PastCases, type PastCaseRow } from "@/components/court/past-cases";
 import { Button } from "@/components/ui/button";
@@ -136,7 +136,7 @@ export default async function HistoryPage() {
             <h2 className="text-label-docket uppercase text-walnut">{t("dashboardHeading")}</h2>
             <PeaceCalendar conflicts={conflictDays} courtOpenedAt={courtOpenedAt} />
             <BlameDistribution names={{ a: nameA, b: nameB }} avg={stats.avgResponsibility} moreResponsible={moreResponsible} />
-            <PatternTally patterns={stats.conflictPatternCounts} />
+            <ArgumentLoop patterns={stats.conflictPatternCounts} />
           </div>
 
           <section className="flex flex-col gap-3">
