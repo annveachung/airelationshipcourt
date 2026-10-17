@@ -25,14 +25,14 @@ export function BlameDistribution({ names, avg, moreResponsible }: Props) {
       <div className="flex flex-col gap-1.5">
         <div className="flex justify-between gap-4">
           <div className="flex min-w-0 flex-col">
-            <span className="text-headline-sm text-espresso">{avg.a}%</span>
+            <span className="text-[26px] font-semibold leading-8 tabular-nums text-espresso">{avg.a}%</span>
             <span className="flex min-w-0 items-center gap-1.5 text-body-sm text-walnut">
               <span aria-hidden className="size-2.5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_var(--color-hairline-strong)]" style={{ background: PARTNER_COLOR.a }} />
               <span className="truncate">{names.a}</span>
             </span>
           </div>
           <div className="flex min-w-0 flex-col items-end">
-            <span className="text-headline-sm text-espresso">{avg.b}%</span>
+            <span className="text-[26px] font-semibold leading-8 tabular-nums text-espresso">{avg.b}%</span>
             <span className="flex min-w-0 items-center gap-1.5 text-body-sm text-walnut">
               <span className="truncate">{names.b}</span>
               <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ background: PARTNER_COLOR.b }} />
