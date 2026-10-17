@@ -515,6 +515,8 @@
     "failed": "語音輸入目前無法使用，你可以改用打字。"
   },
   "insights": {
+    "loopHeading": "爭執循環",
+    "loopBody": "你們最常出現的衝突模式，依出現次數排序（不代表因果關係）。每個圓點代表一個案件，點一下即可開啟。",
     "calendarHeading": "和平日曆",
     "calendarBody": "最近六個月，每一格代表一天。紅色是有立案的日子。",
     "peaceful": "和平",
@@ -529,14 +531,8 @@
     "blameHeading": "責任分配",
     "blameBody": "所有已結案件的平均責任比例。",
     "moreResponsibleCounts": "被判較有責任：{a} {aCount} 次 · {b} {bCount} 次",
-    "patternsHeading": "反覆出現的衝突模式",
-    "patternsBody": "法庭在你們案件中發現的行為模式。每個圓點代表一個案件，點一下即可開啟。",
     "patternCases": "{count, plural, other {出現在 # 個案件中}}",
     "patternsNoneRecurring": "目前還沒有模式在超過一個案件中出現，這是個好跡象。",
-    "patternsRecurringHeading": "反覆出現",
-    "patternsOnceHeading": "只出現過一次",
-    "patternsShowMore": "再顯示 {count} 個",
-    "patternsShowFewer": "收合",
     "patternsLegendDot": "一個案件"
   }
 }

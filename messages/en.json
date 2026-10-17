@@ -515,6 +515,8 @@
     "failed": "Voice input isn't working right now. You can type instead."
   },
   "insights": {
+    "loopHeading": "The argument loop",
+    "loopBody": "Your top conflict patterns, numbered by how often they come up (not by what causes what). Each dot is one case; tap it to open the case.",
     "calendarHeading": "Peace calendar",
     "calendarBody": "The last six months, one square per day. A red day is a day a case was filed.",
     "peaceful": "Peaceful",
@@ -529,14 +531,8 @@
     "blameHeading": "Blame distribution",
     "blameBody": "The average share of responsibility across all closed cases.",
     "moreResponsibleCounts": "Found more responsible: {a} {aCount} · {b} {bCount}",
-    "patternsHeading": "Recurring conflict patterns",
-    "patternsBody": "Behaviour patterns the court spotted in your cases. Each dot is one case; tap a dot to open it.",
     "patternCases": "{count, plural, one {came up in # case} other {came up in # cases}}",
     "patternsNoneRecurring": "Nothing has come up in more than one case yet. That is a good sign.",
-    "patternsRecurringHeading": "Keeps coming back",
-    "patternsOnceHeading": "Came up once",
-    "patternsShowMore": "Show {count} more",
-    "patternsShowFewer": "Show fewer",
     "patternsLegendDot": "One case"
   }
 }
