@@ -518,7 +518,7 @@
     "loopHeading": "爭執循環",
     "loopBody": "你們最常出現的衝突模式（不分先後），以及各自在已結案件中出現的頻率。",
     "calendarHeading": "和平日曆",
-    "calendarBody": "最近六個月，每一格代表一天。紅色是有立案的日子。",
+    "calendarBody": "最近六個月，每一格代表一天。粉紅色是有立案的日子。",
     "peaceful": "和平",
     "conflict": "衝突",
     "beforeCourt": "法庭成立之前",
