@@ -136,7 +136,7 @@ export default async function HistoryPage() {
             <h2 className="text-label-docket uppercase text-walnut">{t("dashboardHeading")}</h2>
             <PeaceCalendar conflicts={conflictDays} courtOpenedAt={courtOpenedAt} />
             <BlameDistribution names={{ a: nameA, b: nameB }} avg={stats.avgResponsibility} moreResponsible={moreResponsible} />
-            <ArgumentLoop patterns={stats.conflictPatternCounts} />
+            <ArgumentLoop patterns={stats.conflictPatternCounts} totalCases={stats.casesCompleted} />
           </div>
 
           <section className="flex flex-col gap-3">
