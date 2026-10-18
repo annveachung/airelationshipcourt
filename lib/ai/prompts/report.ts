@@ -10,7 +10,6 @@ export const REPORT_EXAMPLE = {
   secondary_issues: "Different expectations about notice\nStress from work",
   emotional_themes: "[[A]]: hurt and disappointed\n[[B]]: stressed and guilty",
   key_discrepancies: "The message was sent at 6:15, but [[A]] expected earlier notice\n[[B]] saw the silence as punishment; [[A]] meant it as hurt",
-  follow_up_findings: "Both agreed this has happened before\n[[B]] admitted they could have flagged the risk earlier",
   treaty_personal_1: "[[B]] will send a 'might be late' text the moment plans are at risk.",
   treaty_personal_2: "[[A]] will say what hurts out loud instead of going silent.",
   treaty_personal_3: "Both will reschedule a proper do-over dinner within the week.",
@@ -39,17 +38,17 @@ do not change or contradict them.
 ${DATA_NOT_INSTRUCTIONS}
 ${NAME_TOKENS}
 
-Tone: neutral and readable, warm and lightly witty. Keep every item short and scannable. Use only facts that
+Readers are an ordinary couple, not researchers. Tone: plain, everyday words, warm and lightly witty; no jargon or
+clinical terms. Keep every item short and scannable (one short sentence or phrase each). Use only facts that
 appear in the material below; never invent details.
 
 Fields:
 - case_summary: 2 to 3 neutral sentences: what the disagreement was about and how each partner experienced it.
 - primary_conflict: one short phrase. secondary_issues: 1 to 3 short items, one per line.
-- emotional_themes: 2 to 4 short items, one per line (who felt what).
+- emotional_themes: 2 to 4 short items, one per line, each written as the partner token, a colon, then how they felt
+  (e.g. "[[A]]: hurt and disappointed").
 - key_discrepancies: 2 to 4 short items, one per line: concrete places the two accounts differ.
-- follow_up_findings: 2 to 3 short items, one per line: what the follow-up answers cleared up or confirmed.
-- The follow-up answers are background only: SUMMARISE what they revealed inside case_summary, key_discrepancies and
-  follow_up_findings. Never quote a question or an answer word for word, and never list them.
+- The follow-up answers are background only: SUMMARISE what they revealed inside case_summary and key_discrepancies. Never quote a question or an answer word for word, and never list them.
 - treaty_personal_1..3: three MUTUAL, friendly, specific "peace treaty" clauses drawn from THIS case (one sentence
   each, at most 20 words). Playful and kind, each asking something small and doable of one or both partners, never
   blaming or humiliating anyone.
