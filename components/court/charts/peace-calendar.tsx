@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
-import { DAY_COLOR } from "@/lib/charts/palette";
+import { DAY_COLOR, DAY_OPACITY } from "@/lib/charts/palette";
 
 export type ConflictDay = { filedAt: string; title: string; href: string };
 
@@ -36,7 +36,7 @@ const useIsClient = () =>
     () => false,
   );
 
-/** The last six months as a week-by-day grid: green peaceful days, red days a case was filed. */
+/** The last six months as a week-by-day grid: green peaceful days, pink days a case was filed. */
 export function PeaceCalendar({ conflicts, courtOpenedAt }: Props) {
   const t = useTranslations("insights");
   const locale = useLocale();
@@ -151,7 +151,7 @@ export function PeaceCalendar({ conflicts, courtOpenedAt }: Props) {
                       aria-label={label}
                       title={label}
                       className={`${cellClass} focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-espresso`}
-                      style={{ background: DAY_COLOR.conflict }}
+                      style={{ background: DAY_COLOR.conflict, opacity: DAY_OPACITY }}
                       {...handlers}
                     />
                   );
@@ -165,7 +165,7 @@ export function PeaceCalendar({ conflicts, courtOpenedAt }: Props) {
                     className={cellClass}
                     style={
                       day.state === "peaceful"
-                        ? { background: DAY_COLOR.peaceful }
+                        ? { background: DAY_COLOR.peaceful, opacity: DAY_OPACITY }
                         : { boxShadow: "inset 0 0 0 1px var(--color-hairline-strong)" }
                     }
                     onClick={() => setActive(day)}
@@ -186,11 +186,11 @@ export function PeaceCalendar({ conflicts, courtOpenedAt }: Props) {
 
       <div className="flex flex-wrap gap-4 text-body-sm text-walnut">
         <span className="flex items-center gap-1.5">
-          <span aria-hidden className="size-2.5 rounded-[2px]" style={{ background: DAY_COLOR.peaceful }} />
+          <span aria-hidden className="size-2.5 rounded-[2px]" style={{ background: DAY_COLOR.peaceful, opacity: DAY_OPACITY }} />
           {t("peaceful")}
         </span>
         <span className="flex items-center gap-1.5">
-          <span aria-hidden className="size-2.5 rounded-[2px]" style={{ background: DAY_COLOR.conflict }} />
+          <span aria-hidden className="size-2.5 rounded-[2px]" style={{ background: DAY_COLOR.conflict, opacity: DAY_OPACITY }} />
           {t("conflict")}
         </span>
         {view?.anyBefore && (

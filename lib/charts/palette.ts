@@ -10,9 +10,10 @@
 //   pair CVD and normal-vision checks for bar/line charts in this order. More than 8 series
 //   folds into "Other" (muted) rather than cycling — cycling breaks the CVD guarantee.
 // - The peace calendar's two day states are a 2-slot categorical pair, run through the skill's
-//   validator: green #6aaf7d vs the app's stamp red #b8405e passes lightness, chroma, CVD
-//   (deutan ΔE 13.8) and normal-vision checks. Their contrast on white is under 3:1, so every day
-//   also has a text label (hover caption, aria-label) and the counts are written out.
+//   validator as drawn (80% opacity on white): light green #94cf9f vs the theme's heart pink
+//   #d9728f passes CVD (deutan ΔE 10.1) and normal-vision (ΔE 20.0) separation. Their contrast on
+//   white is low, so every day also has a text label (hover caption, aria-label) and the counts
+//   are written out.
 export const PARTNER_COLOR = { a: "#f4c9d6", b: "#3e2723" } as const; // rose / espresso
 
 // - The argument loop's stops are told apart by colour: five evenly spaced steps (OKLab) along
@@ -24,7 +25,8 @@ export const PARTNER_COLOR = { a: "#f4c9d6", b: "#3e2723" } as const; // rose / 
 //   uses a neutral bar meter, so it never shares these colours.
 export const LOOP_COLORS = ["#63433c", "#9c5b64", "#d9728f", "#edabbb", "#fbe3ea"] as const;
 
-export const DAY_COLOR = { peaceful: "#6aaf7d", conflict: "#b8405e" } as const;
+export const DAY_COLOR = { peaceful: "#94cf9f", conflict: "#d9728f" } as const;
+export const DAY_OPACITY = 0.8;
 
 // Validated default categorical order (dataviz skill, references/palette.md), light mode.
 export const CATEGORICAL = [
