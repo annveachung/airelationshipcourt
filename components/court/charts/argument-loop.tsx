@@ -1,13 +1,26 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
+import { frequencyOf, type FrequencyLevel } from "@/lib/analytics/frequency";
 import type { PatternCount } from "@/lib/analytics/stats";
+import { LOOP_COLORS } from "@/lib/charts/palette";
 
 const MAX_STOPS = 5;
+const DOT_OPACITY = 0.8; // softer at rest; the lit stop goes to full strength
+
+const FREQUENCY_KEY: Record<FrequencyLevel, "freqOften" | "freqSometimes" | "freqRarely"> = {
+  often: "freqOften",
+  sometimes: "freqSometimes",
+  rarely: "freqRarely",
+};
+const FREQUENCY_LEGEND_KEY: Record<FrequencyLevel, "freqOftenLegend" | "freqSometimesLegend" | "freqRarelyLegend"> = {
+  often: "freqOftenLegend",
+  sometimes: "freqSometimesLegend",
+  rarely: "freqRarelyLegend",
+};
 const STEP_MS = 1800; // time for the light to travel from one stop to the next
 
 // The ring, in SVG units.
@@ -15,6 +28,23 @@ const SIZE = 220;
 const C = SIZE / 2;
 const R = 78;
 const NODE_R = 15;
+
+// The meter for "how often": three bars, filled up to the level (rarely 1, sometimes 2, often 3).
+const LEVEL_BARS: Record<FrequencyLevel, number> = { rarely: 1, sometimes: 2, often: 3 };
+
+function Meter({ level }: { level: FrequencyLevel }) {
+  return (
+    <span aria-hidden className="flex items-end gap-[2px]">
+      {[1, 2, 3].map((bar) => (
+        <span
+          key={bar}
+          className={cn("w-1 rounded-[1px]", bar <= LEVEL_BARS[level] ? "bg-espresso" : "bg-recessed")}
+          style={{ height: 4 + bar * 3 }}
+        />
+      ))}
+    </span>
+  );
+}
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const point = (angle: number, radius = R) => ({ x: C + radius * Math.cos(angle), y: C + radius * Math.sin(angle) });
@@ -45,28 +75,12 @@ const useReducedMotion = () =>
     () => true, // server: render still; the browser starts the loop
   );
 
-// One dot per case the pattern came up in; each dot opens that case.
-function Tally({ pattern }: { pattern: PatternCount }) {
-  return (
-    <span className="flex shrink-0 flex-wrap justify-end gap-1">
-      {pattern.cases.map((c) => (
-        <Link
-          key={c.id}
-          href={`/cases/${c.id}/report`}
-          title={c.title}
-          aria-label={c.title}
-          className="size-2.5 rounded-full bg-stamp hover:bg-espresso focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-espresso"
-        />
-      ))}
-    </span>
-  );
-}
-
 /**
- * The couple's top conflict patterns on a loop, most frequent first. A light travels the ring and
- * lights up each stop (and its row in the list) in turn. Still for people who prefer less motion.
+ * The couple's most common conflict patterns on a loop (in no particular order), each with how
+ * often it comes up. A light travels the ring and lights up each stop and its row in turn. Still
+ * for people who prefer less motion.
  */
-export function ArgumentLoop({ patterns }: { patterns: PatternCount[] }) {
+export function ArgumentLoop({ patterns, totalCases }: { patterns: PatternCount[]; totalCases: number }) {
   const t = useTranslations("insights");
   const stops = patterns.slice(0, MAX_STOPS);
   const n = stops.length;
@@ -146,64 +160,74 @@ export function ArgumentLoop({ patterns }: { patterns: PatternCount[] }) {
                 <circle
                   cx={r2(x)}
                   cy={r2(y)}
-                  r={on ? NODE_R + 2 : NODE_R}
-                  fill={on ? "var(--color-stamp)" : "var(--color-surface)"}
-                  stroke={on ? "var(--color-stamp)" : "var(--color-espresso)"}
+                  r={NODE_R + 5}
+                  fill="none"
+                  stroke="var(--color-espresso)"
                   strokeWidth={2}
-                  style={{ transition: "r 250ms ease, fill 250ms ease, stroke 250ms ease" }}
+                  opacity={on ? 1 : 0}
+                  style={{ transition: "opacity 250ms ease" }}
                 />
-                <text
-                  x={r2(x)}
-                  y={r2(y)}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fontSize={13}
-                  fontWeight={600}
-                  fill={on ? "#ffffff" : "var(--color-espresso)"}
-                  style={{ transition: "fill 250ms ease" }}
-                >
-                  {i + 1}
-                </text>
+                <circle
+                  cx={r2(x)}
+                  cy={r2(y)}
+                  r={on ? NODE_R + 1 : NODE_R - 3}
+                  fill={LOOP_COLORS[i]}
+                  fillOpacity={on ? 1 : DOT_OPACITY}
+                  stroke="var(--color-hairline-strong)"
+                  strokeWidth={1}
+                  style={{ transition: "r 250ms ease, fill-opacity 250ms ease" }}
+                />
               </g>
             );
           })}
         </svg>
 
-        <ol className="flex w-full min-w-0 flex-col gap-1">
+        <ul className="flex w-full min-w-0 flex-col gap-1">
           {stops.map((p, i) => {
             const on = lit === i;
+            const { percent, level } = frequencyOf(p.count, totalCases);
+            const levelLabel = t(FREQUENCY_KEY[level]);
             return (
               <li
                 key={p.pattern}
-                aria-label={`${i + 1}. ${capitalize(p.pattern)}: ${t("patternCases", { count: p.count })}`}
+                aria-label={`${capitalize(p.pattern)}: ${levelLabel}, ${t("freqShare", { percent })}`}
                 className={cn(
                   "flex items-center gap-3 rounded px-2 py-2 transition-colors duration-300",
                   on ? "bg-rose/40" : "bg-transparent",
                 )}
               >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "flex size-6 shrink-0 items-center justify-center rounded-full border-2 text-body-sm font-semibold transition-colors duration-300",
-                    on ? "border-stamp bg-stamp text-white" : "border-espresso text-espresso",
-                  )}
-                >
-                  {i + 1}
+                <span aria-hidden className="flex size-7 shrink-0 items-center justify-center">
+                  <span
+                    className={cn(
+                      "rounded-full shadow-[inset_0_0_0_1px_var(--color-hairline-strong)] transition-all duration-300",
+                      on ? "size-6 ring-2 ring-espresso ring-offset-2 ring-offset-rose/40" : "size-4",
+                    )}
+                    style={{ background: LOOP_COLORS[i], opacity: on ? 1 : DOT_OPACITY }}
+                  />
                 </span>
                 <span className="min-w-0 flex-1 text-body-md text-espresso">{capitalize(p.pattern)}</span>
-                <Tally pattern={p} />
-                <span className="w-6 shrink-0 text-right text-body-sm tabular-nums text-walnut">×{p.count}</span>
+                <span className="flex shrink-0 flex-col items-end">
+                  <span className="flex items-center gap-1.5 text-body-sm font-medium text-espresso">
+                    <Meter level={level} />
+                    {levelLabel}
+                  </span>
+                  <span className="text-body-sm tabular-nums text-walnut">{t("freqShare", { percent })}</span>
+                </span>
               </li>
             );
           })}
-        </ol>
+        </ul>
       </div>
 
       <div className="flex flex-col gap-1 text-body-sm">
         {!anyRecurring && <p className="text-espresso">{t("patternsNoneRecurring")}</p>}
-        <p className="flex items-center gap-1.5 text-walnut">
-          <span aria-hidden className="size-2.5 rounded-full bg-stamp" />
-          {t("patternsLegendDot")}
+        <p className="flex flex-wrap gap-x-4 gap-y-1 text-walnut">
+          {(["often", "sometimes", "rarely"] as const).map((level) => (
+            <span key={level} className="flex items-center gap-1.5">
+              <Meter level={level} />
+              {t(FREQUENCY_LEGEND_KEY[level])}
+            </span>
+          ))}
         </p>
       </div>
     </Card>

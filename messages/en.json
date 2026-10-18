@@ -516,7 +516,7 @@
   },
   "insights": {
     "loopHeading": "The argument loop",
-    "loopBody": "Your top conflict patterns, numbered by how often they come up (not by what causes what). Each dot is one case; tap it to open the case.",
+    "loopBody": "Your most common conflict patterns, in no particular order, and how often each one comes up across your closed cases.",
     "calendarHeading": "Peace calendar",
     "calendarBody": "The last six months, one square per day. A red day is a day a case was filed.",
     "peaceful": "Peaceful",
@@ -531,8 +531,13 @@
     "blameHeading": "Blame distribution",
     "blameBody": "The average share of responsibility across all closed cases.",
     "moreResponsibleCounts": "Found more responsible: {a} {aCount} · {b} {bCount}",
-    "patternCases": "{count, plural, one {came up in # case} other {came up in # cases}}",
     "patternsNoneRecurring": "Nothing has come up in more than one case yet. That is a good sign.",
-    "patternsLegendDot": "One case"
+    "freqOften": "Often",
+    "freqSometimes": "Sometimes",
+    "freqRarely": "Rarely",
+    "freqShare": "{percent}% of cases",
+    "freqOftenLegend": "Often: 40% of cases or more",
+    "freqSometimesLegend": "Sometimes: 20–39%",
+    "freqRarelyLegend": "Rarely: under 20%"
   }
 }

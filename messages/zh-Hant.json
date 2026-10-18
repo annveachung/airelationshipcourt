@@ -516,7 +516,7 @@
   },
   "insights": {
     "loopHeading": "爭執循環",
-    "loopBody": "你們最常出現的衝突模式，依出現次數排序（不代表因果關係）。每個圓點代表一個案件，點一下即可開啟。",
+    "loopBody": "你們最常出現的衝突模式（不分先後），以及各自在已結案件中出現的頻率。",
     "calendarHeading": "和平日曆",
     "calendarBody": "最近六個月，每一格代表一天。紅色是有立案的日子。",
     "peaceful": "和平",
@@ -531,8 +531,13 @@
     "blameHeading": "責任分配",
     "blameBody": "所有已結案件的平均責任比例。",
     "moreResponsibleCounts": "被判較有責任：{a} {aCount} 次 · {b} {bCount} 次",
-    "patternCases": "{count, plural, other {出現在 # 個案件中}}",
     "patternsNoneRecurring": "目前還沒有模式在超過一個案件中出現，這是個好跡象。",
-    "patternsLegendDot": "一個案件"
+    "freqOften": "經常",
+    "freqSometimes": "有時",
+    "freqRarely": "偶爾",
+    "freqShare": "{percent}% 的案件",
+    "freqOftenLegend": "經常：40% 以上的案件",
+    "freqSometimesLegend": "有時：20–39%",
+    "freqRarelyLegend": "偶爾：低於 20%"
   }
 }

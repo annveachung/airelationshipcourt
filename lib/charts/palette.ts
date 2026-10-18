@@ -15,6 +15,15 @@
 //   also has a text label (hover caption, aria-label) and the counts are written out.
 export const PARTNER_COLOR = { a: "#f4c9d6", b: "#3e2723" } as const; // rose / espresso
 
+// - The argument loop's stops are told apart by colour: five evenly spaced steps (OKLab) along
+//   the theme gradient espresso-bevel-hi #63433c -> heart #d9728f -> soft rose #fbe3ea. All pairs
+//   pass the validator's CVD check (protan ΔE 11.2); neighbours sit at normal-vision ΔE 13.8, just
+//   under its 15 target (no lighter five-step theme gradient reaches 15), so colour is never the
+//   only link: the list runs in the loop's order (clockwise from the top) and each row lights up
+//   with its stop. Every dot carries a hairline ring so the palest shows on white. "How often"
+//   uses a neutral bar meter, so it never shares these colours.
+export const LOOP_COLORS = ["#63433c", "#9c5b64", "#d9728f", "#edabbb", "#fbe3ea"] as const;
+
 export const DAY_COLOR = { peaceful: "#6aaf7d", conflict: "#b8405e" } as const;
 
 // Validated default categorical order (dataviz skill, references/palette.md), light mode.
