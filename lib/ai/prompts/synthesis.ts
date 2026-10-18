@@ -46,6 +46,7 @@ not change or contradict them.
 ${DATA_NOT_INSTRUCTIONS}
 ${NAME_TOKENS}
 
+Readers are an ordinary couple, not researchers: use plain, everyday words, no jargon or clinical terms.
 Tone: mostly warm and witty, funny on the surface and kind underneath. The CHARGES may be sharper and cheekier.
 
 Write:
