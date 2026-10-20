@@ -58,7 +58,10 @@ export function NotificationBell() {
     t(`${style}.${n.type}`, { name: n.params.name ?? t("partnerFallback") });
 
   return (
-    <div ref={root} className="relative">
+    // On phones the bell sits near the left of the header, so a panel hanging off its right edge
+    // would run off-screen. Below md the wrapper isn't positioned: the panel anchors to the
+    // (sticky, positioned) header instead and spans its width, just under it.
+    <div ref={root} className="md:relative">
       <button
         ref={button}
         type="button"
@@ -82,7 +85,7 @@ export function NotificationBell() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-30 mt-2 flex w-[min(20rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-card border border-hairline bg-surface shadow-float"
+          className="absolute inset-x-4 top-full z-30 mt-2 flex flex-col overflow-hidden rounded-card border border-hairline bg-surface shadow-float md:inset-x-auto md:right-0 md:w-80"
         >
           <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
             <span className="text-headline-sm text-espresso">{t("title")}</span>
@@ -112,7 +115,7 @@ export function NotificationBell() {
           {items.length === 0 ? (
             <p className="px-4 py-6 text-center text-body-sm text-walnut">{t("empty")}</p>
           ) : (
-            <ul className="max-h-80 overflow-y-auto">
+            <ul className="max-h-[min(20rem,60dvh)] overflow-y-auto overscroll-contain">
               {items.map((n) => (
                 <li key={n.id} role="none">
                   <Link
