@@ -336,7 +336,8 @@
     "verdict": "Verdict",
     "advice": "Advice",
     "report": "Report",
-    "treaty": "Treaty"
+    "treaty": "Treaty",
+    "backToCurrent": "Back to where you are"
   },
   "advice": {
     "title": "The court's advice",

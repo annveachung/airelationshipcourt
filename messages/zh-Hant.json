@@ -336,7 +336,8 @@
     "verdict": "判決",
     "advice": "建議",
     "report": "報告",
-    "treaty": "條約"
+    "treaty": "條約",
+    "backToCurrent": "回到目前進度"
   },
   "advice": {
     "title": "法庭的建議",
