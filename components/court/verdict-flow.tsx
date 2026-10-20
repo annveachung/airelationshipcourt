@@ -7,10 +7,12 @@ import { TranslationGate } from "@/components/court/translation-gate";
 import { TreatyCard } from "@/components/court/treaty-card";
 import { VerdictScreen } from "@/components/court/verdict-screen";
 import { WaitingScreen } from "@/components/court/waiting-screen";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { panelAgreement } from "@/lib/cases/panel-agreement";
 import type { CaseStage } from "@/lib/cases/stages";
 import type { VerdictBundle } from "@/lib/cases/verdict-data";
+import { stageView, type VerdictView } from "@/lib/cases/verdict-view";
 import type { Locale } from "@/lib/i18n";
 
 type Props = {
@@ -24,6 +26,7 @@ type Props = {
   partnerName: string;
   bundle: VerdictBundle;
   errorText: string | null;
+  view: VerdictView; // already checked against the stage (resolveView)
 };
 
 // Everything from the verdict onward: verdict -> advice -> report (+ treaty). A CLOSED case is
@@ -39,10 +42,14 @@ export async function VerdictFlow({
   partnerName,
   bundle,
   errorText,
+  view,
 }: Props) {
   const tVerdict = await getTranslations("verdict");
   const tReport = await getTranslations("report");
   const tTreaty = await getTranslations("treaty");
+  const tStepper = await getTranslations("stepper");
+  // Looking back at an earlier screen: no "continue" there, and a way back to the current one.
+  const lookingBack = view !== stageView(stage);
   const caseNumber = caseId.slice(0, 4).toUpperCase();
   const { verdict, verdictTexts: texts } = bundle;
 
@@ -80,12 +87,17 @@ export async function VerdictFlow({
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-      <StageStepper stage={stage} />
+      <StageStepper caseId={caseId} stage={stage} view={view} />
+      {lookingBack && (
+        <Link href={`/cases/${caseId}`} className="self-start text-body-sm text-walnut underline print:hidden">
+          {tStepper("backToCurrent")}
+        </Link>
+      )}
       {bundle.needsVerdictTranslation && <TranslationGate caseId={caseId} locale={locale} />}
       {needsReportWork && <ReportPreparer caseId={caseId} locale={locale} showNote={reportBlocked && !bundle.reportTexts} />}
       {errorBanner}
 
-      {stage === "VERDICT" && (
+      {view === "verdict" && (
         <VerdictScreen
           caseId={caseId}
           caseNumber={caseNumber}
@@ -96,11 +108,11 @@ export async function VerdictFlow({
           decidedBy={verdict.decidedBy}
           texts={texts}
           panel={bundle.panel}
-          showContinue
+          showContinue={!lookingBack}
         />
       )}
 
-      {stage === "RECOMMENDATIONS" && (
+      {view === "advice" && (
         <AdviceScreen
           caseId={caseId}
           names={names}
@@ -108,11 +120,11 @@ export async function VerdictFlow({
           texts={texts}
           charges={verdict.charges}
           reportReady={bundle.reportReady}
-          showContinue
+          showContinue={!lookingBack}
         />
       )}
 
-      {stage === "REPORT" && (
+      {view === "report" && (
         <>
           {reportDoc ?? (
             <Card>
@@ -121,13 +133,15 @@ export async function VerdictFlow({
           )}
           {bundle.reportTexts && (
             <>
-              <TreatyCard
-                caseId={caseId}
-                names={names}
-                iAmA={iAmA}
-                signed={signed}
-                report={bundle.reportTexts}
-              />
+              <div id="treaty" className="scroll-mt-24">
+                <TreatyCard
+                  caseId={caseId}
+                  names={names}
+                  iAmA={iAmA}
+                  signed={signed}
+                  report={bundle.reportTexts}
+                />
+              </div>
               {mySigned && (
                 <Card className="print:hidden">
                   <WaitingScreen

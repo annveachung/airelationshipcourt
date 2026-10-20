@@ -5,6 +5,7 @@ import { CourtStatusFull, CourtStatusStrip } from "@/components/court/court-stat
 import { FollowUpForm, type FollowUpQuestionRow } from "@/components/court/follow-up-form";
 import { TestimonyForm } from "@/components/court/testimony-form";
 import { VerdictFlow } from "@/components/court/verdict-flow";
+import { resolveView } from "@/lib/cases/verdict-view";
 import { WaitingScreen } from "@/components/court/waiting-screen";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -54,7 +55,8 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
   const iAmA = couple.me.role === "partner_a";
   const mySubmitted = iAmA ? status.aSubmitted : status.bSubmitted;
   const myFollowedUp = iAmA ? status.aFollowedUp : status.bFollowedUp;
-  const errorKey = toCaseErrorKey((await searchParams).error);
+  const query = await searchParams;
+  const errorKey = toCaseErrorKey(query.error);
   const names = {
     a: iAmA ? couple.me.name : couple.partner.name,
     b: iAmA ? couple.partner.name : couple.me.name,
@@ -187,6 +189,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/cas
           partnerName={partner}
           bundle={bundle}
           errorText={errorKey ? tErr(errorKey) : null}
+          view={resolveView(stage, query.view)}
         />
       </div>
       </CaseLive>
