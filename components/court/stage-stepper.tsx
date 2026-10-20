@@ -17,17 +17,17 @@ export async function StageStepper({ caseId, stage, view }: { caseId: string; st
   const reached = VERDICT_VIEWS.indexOf(stageView(stage));
 
   return (
-    <ol className="flex flex-wrap items-center gap-2 print:hidden" aria-label={t("label")}>
+    <ol className="flex w-full items-center gap-1.5 print:hidden md:w-auto md:gap-2" aria-label={t("label")}>
       {STEPS.map((step, i) => {
         const stepView = viewOf(step);
         const available = VERDICT_VIEWS.indexOf(stepView) <= reached;
         const showing = step !== "treaty" && stepView === view;
         const pill = cn(
-          "flex items-center gap-1.5 rounded-full px-3 py-1 text-label-docket uppercase",
+          "flex items-center whitespace-nowrap rounded-full px-2.5 py-1 text-label-docket uppercase md:px-3",
           showing ? "bg-espresso text-canvas" : available ? "bg-rose/40 text-espresso" : "bg-recessed text-walnut",
         );
         return (
-          <li key={step} className="flex items-center gap-2">
+          <li key={step} className={cn("flex items-center gap-1.5 md:gap-2", i < STEPS.length - 1 && "flex-1 md:flex-none")}>
             {available ? (
               <Link
                 href={`/cases/${caseId}?view=${stepView}${step === "treaty" ? "#treaty" : ""}`}
@@ -43,7 +43,8 @@ export async function StageStepper({ caseId, stage, view }: { caseId: string; st
             ) : (
               <span className={pill}>{t(step)}</span>
             )}
-            {i < STEPS.length - 1 && <span aria-hidden className="h-px w-3 bg-hairline-strong" />}
+            {/* The connector stretches on phones so the four steps share one row. */}
+            {i < STEPS.length - 1 && <span aria-hidden className="h-px min-w-1.5 flex-1 bg-hairline-strong md:w-3 md:flex-none" />}
           </li>
         );
       })}

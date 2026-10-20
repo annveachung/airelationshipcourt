@@ -62,7 +62,7 @@ export async function VerdictScreen({
         <span className={cn("text-label-docket uppercase", isWinner ? "text-rose" : "text-walnut")}>
           {who === "a" ? tPartner("partnerA") : tPartner("partnerB")}
         </span>
-        <span className="text-display-verdict">{pct}%</span>
+        <span className="text-[34px] font-semibold leading-10 tabular-nums">{pct}%</span>
       </div>
     );
   };
